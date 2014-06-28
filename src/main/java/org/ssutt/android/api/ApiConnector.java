@@ -1,5 +1,8 @@
 package org.ssutt.android.api;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -51,5 +54,11 @@ public class ApiConnector extends AsyncTask<String, Boolean, JSONArray> {
         }
 
         return new JSONArray();
+    }
+
+    public static boolean isInternetAvialable(Context context) {
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+        return networkInfo != null && networkInfo.isConnectedOrConnecting();
     }
 }

@@ -2,14 +2,12 @@ package org.ssutt.android;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.ssutt.android.api.ApiConnector;
 import org.ssutt.android.api.ApiRequests;
 
@@ -28,21 +26,27 @@ public class MyActivity extends Activity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ApiConnector apiConnector = new ApiConnector();
+                if(ApiConnector.isInternetAvialable(getApplicationContext())) {
+                    ApiConnector apiConnector = new ApiConnector();
 
-                apiConnector.execute(ApiRequests.getDepartments());
-                try {
-                    JSONArray json = apiConnector.get();
-                    for (int i = 0; i < json.length(); i++) {
-                        tv.append(json.getJSONObject(i).getString("name"));
-                        tv.append("\n");
+                    apiConnector.execute(ApiRequests.getDepartments());
+                    try {
+                        JSONArray json = apiConnector.get();
+
+                        tv.setText("");
+                        for (int i = 0; i < json.length(); i++) {
+                            tv.append(json.getJSONObject(i).getString("name"));
+                            tv.append("\n");
+                        }
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    } catch (ExecutionException e) {
+                        e.printStackTrace();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                } else {
+                    tv.setText("You've not internet!");
                 }
             }
         });

@@ -3,7 +3,7 @@ package org.ssutt.android.api;
 import static java.lang.String.format;
 
 public abstract class ApiRequests {
-    private static final String API_URL = "http://api.ssutt.org:8080/%s";
+    private static final String API_URL = "http://api.ssutt.org:8080/1/%s";
     private static final String DEPARTMENTS = format(API_URL, "departments");
     private static final String DEPARTMENT_MSG = format(API_URL, "%s/msg");
     private static final String GROUPS = format(API_URL, "%s/groups/?filled=%d");
