@@ -20,7 +20,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-public class ApiConnector extends AsyncTask<String, Boolean, JSONArray> {
+public class ApiConnector extends AsyncTask<String, Integer, JSONArray> {
+    public static boolean isInternetAvailable(Context context) {
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+        return networkInfo != null && networkInfo.isConnectedOrConnecting();
+    }
+
+    @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
+    }
 
     @Override
     protected JSONArray doInBackground(String... params) {
@@ -41,7 +51,6 @@ public class ApiConnector extends AsyncTask<String, Boolean, JSONArray> {
                 while ((line = reader.readLine()) != null) {
                     result.append(line);
                 }
-
                 return new JSONArray(result.toString());
             } else {
                 Log.d("log", "Some error while connecting to api");
@@ -56,9 +65,8 @@ public class ApiConnector extends AsyncTask<String, Boolean, JSONArray> {
         return new JSONArray();
     }
 
-    public static boolean isInternetAvialable(Context context) {
-        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-        return networkInfo != null && networkInfo.isConnectedOrConnecting();
+    @Override
+    protected void onPostExecute(JSONArray jsonArray) {
+        super.onPostExecute(jsonArray);
     }
 }
