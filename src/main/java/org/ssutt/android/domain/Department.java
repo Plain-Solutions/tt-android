@@ -22,9 +22,9 @@ public class Department {
     public Department() {
     }
 
-    public Department(String name, String tag) {
-        this.name = name;
+    public Department(String tag, String name) {
         this.tag = tag;
+        this.name = name;
     }
 
     public String getName() {
