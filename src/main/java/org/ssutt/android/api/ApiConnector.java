@@ -19,14 +19,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 public class ApiConnector extends AsyncTask<String, Integer, String> {
-    private static final ApiConnector API_CONNECTOR = new ApiConnector();
-
-    private ApiConnector() {}
-
-    public static ApiConnector getInstance() {
-        return API_CONNECTOR;
-    }
-
     @Override
     protected String doInBackground(String... params) {
         HttpClient httpClient = new DefaultHttpClient();

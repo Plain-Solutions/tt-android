@@ -2,6 +2,8 @@ package org.ssutt.android.activity;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -23,20 +25,43 @@ import org.ssutt.android.domain.Message;
 
 import java.util.concurrent.ExecutionException;
 
-public class TestActivity extends Activity {
+public class TestActivity extends Activity implements View.OnClickListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.json_view);
 
-        getDepartments();
-        getMsg("knt");
-        getGroups("knt", GroupMode.ONLY_FILLED);
-        getSchedule("knt", "151");
+        Button departmentsBtn = (Button) findViewById(R.id.departmentBtn);
+        Button msgBtn = (Button) findViewById(R.id.msgBtn);
+        Button groupsBtn = (Button) findViewById(R.id.groupsBtn);
+        Button scheduleBtn = (Button) findViewById(R.id.scheduleBtn);
+
+        departmentsBtn.setOnClickListener(this);
+        msgBtn.setOnClickListener(this);
+        groupsBtn.setOnClickListener(this);
+        scheduleBtn.setOnClickListener(this);
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.departmentBtn:
+                getDepartments();
+                break;
+            case R.id.msgBtn:
+                getMsg("knt");
+                break;
+            case R.id.groupsBtn:
+                getGroups("knt", GroupMode.ONLY_FILLED);
+                break;
+            case R.id.scheduleBtn:
+                getSchedule("knt", "151");
+                break;
+        }
     }
 
     private void getSchedule(String department, String group) {
-        ApiConnector apiConnector = ApiConnector.getInstance();
+        ApiConnector apiConnector = new ApiConnector();
         apiConnector.execute(ApiRequests.getSchedule(department, group));
 
         try {
@@ -57,7 +82,7 @@ public class TestActivity extends Activity {
     }
 
     private void getDepartments() {
-        ApiConnector apiConnector = ApiConnector.getInstance();
+        ApiConnector apiConnector = new ApiConnector();
         apiConnector.execute(ApiRequests.getDepartments());
 
         try {
@@ -77,9 +102,9 @@ public class TestActivity extends Activity {
         }
     }
 
-    private void getMsg(String deprtment) {
-        ApiConnector apiConnector = ApiConnector.getInstance();
-        apiConnector.execute(ApiRequests.getDepartmentMsg(deprtment));
+    private void getMsg(String departmentTag) {
+        ApiConnector apiConnector = new ApiConnector();
+        apiConnector.execute(ApiRequests.getDepartmentMsg(departmentTag));
 
         try {
             GsonBuilder gsonBuilder = new GsonBuilder();
@@ -87,7 +112,7 @@ public class TestActivity extends Activity {
             JsonElement jsonElement = new JsonParser().parse(apiConnector.get());
 
             Message department = gsonBuilder.create().fromJson(jsonElement, Message.class);
-            System.out.println(department.getMessage());
+            System.out.println(department);
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
@@ -95,8 +120,9 @@ public class TestActivity extends Activity {
         }
     }
 
+
     private void getGroups(String department, GroupMode mode) {
-        ApiConnector apiConnector = ApiConnector.getInstance();
+        ApiConnector apiConnector = new ApiConnector();
         apiConnector.execute(ApiRequests.getGroups(department, mode));
 
         try {
