@@ -15,7 +15,9 @@
 */
 package org.ssutt.android.domain;
 
-public class Group {
+import java.io.Serializable;
+
+public class Group implements Serializable {
     private String name;
 
     public Group() {
@@ -36,7 +38,7 @@ public class Group {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null) return false;
 
         Group group = (Group) o;
         if (name != null ? !name.equals(group.name) : group.name != null) return false;

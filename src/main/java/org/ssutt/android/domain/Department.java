@@ -15,7 +15,9 @@
 */
 package org.ssutt.android.domain;
 
-public class Department {
+import java.io.Serializable;
+
+public class Department implements Serializable {
     private String name;
     private String tag;
 
@@ -47,7 +49,7 @@ public class Department {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null) return false;
 
         Department that = (Department) o;
 
