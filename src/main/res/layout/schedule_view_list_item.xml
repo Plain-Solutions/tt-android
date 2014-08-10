@@ -10,21 +10,6 @@
     android:clickable="false"
     android:weightSum="1">
 
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textColor="@android:color/black"
-        android:text="08:20 - 09:50"
-        android:id="@+id/timeTextView"
-        android:gravity="center"
-        android:textSize="18sp" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1px"
-        android:background="@color/gray"/>
-
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="fill_parent"

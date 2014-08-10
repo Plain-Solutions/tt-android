@@ -43,7 +43,7 @@ public class ScheduleListAdapter extends ArrayAdapter<Lesson> {
                 lectureColorView.setBackgroundColor(Color.parseColor("#ff5e3a"));
             }
 
-            TextView timeTextView = (TextView) view.findViewById(R.id.timeTextView);
+            TextView timeTextView = (TextView) view.findViewById(R.id.subjectTextView);
             TextView subjectTextView = (TextView) view.findViewById(R.id.subjectTextView);
             TextView locationTextView = (TextView) view.findViewById(R.id.locationTextView);
             TextView typeTextView = (TextView) view.findViewById(R.id.subjectTypeTextView);
