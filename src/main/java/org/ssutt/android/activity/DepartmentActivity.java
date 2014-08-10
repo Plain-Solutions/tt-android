@@ -73,25 +73,7 @@ public class DepartmentActivity extends Activity {
         return departmentNames;
     }
 
-    private Lesson[] getSchedule(String department, String group) {
-        ApiConnector apiConnector = new ApiConnector();
-        apiConnector.execute(ApiRequests.getSchedule(department, group));
 
-        try {
-            GsonBuilder gsonBuilder = new GsonBuilder();
-            gsonBuilder.registerTypeAdapter(Lesson.class, new LessonDeserializer());
-            JsonElement jsonElement = new JsonParser().parse(apiConnector.get());
-            JsonArray asJsonArray = jsonElement.getAsJsonArray();
-
-            return gsonBuilder.create().fromJson(asJsonArray, Lesson[].class);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
 
     private Department[] getDepartments() {
         ApiConnector apiConnector = new ApiConnector();

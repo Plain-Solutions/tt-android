@@ -1,13 +1,17 @@
 package org.ssutt.android.api;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.http.AndroidHttpClient;
 import android.os.AsyncTask;
 import android.util.Log;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -21,33 +25,47 @@ import java.io.InputStreamReader;
 public class ApiConnector extends AsyncTask<String, Integer, String> {
     @Override
     protected String doInBackground(String... params) {
-        HttpClient httpClient = new DefaultHttpClient();
-        HttpGet request = new HttpGet(params[0]);
+        final AndroidHttpClient client = AndroidHttpClient.newInstance("Android");
+        final HttpGet getRequest = new HttpGet(params[0]);
 
         try {
-            HttpResponse response = httpClient.execute(request);
-            StatusLine status = response.getStatusLine();
+            HttpResponse response = client.execute(getRequest);
+            int statusCode = response.getStatusLine().getStatusCode();
 
-            if (status.getStatusCode() == 200) {
-                HttpEntity entity = response.getEntity();
-                InputStream is = entity.getContent();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-
-                StringBuilder result = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    result.append(line);
-                }
-                return result.toString();
-            } else {
-                Log.d("log", "Some error while connecting to api");
+            if (statusCode != HttpStatus.SC_OK) {
+                Log.w("ImageDownloader", "Error " + statusCode + " while retrieving bitmap from " + params[0]);
+                return null;
             }
 
-        } catch (IOException e) {
-            e.printStackTrace();
+            HttpEntity entity = response.getEntity();
+            if (entity != null) {
+                InputStream inputStream = null;
+                try {
+                    inputStream = entity.getContent();
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+
+                    StringBuilder json = new StringBuilder();
+                    String line;
+                    while((line = reader.readLine()) != null) {
+                        json.append(line);
+                    }
+
+                    return  json.toString();
+                } finally {
+                    if (inputStream != null) {
+                        inputStream.close();
+                    }
+                    entity.consumeContent();
+                }
+            }
+        } catch (Exception e) {
+            getRequest.abort();
+            Log.w("ImageDownloader", "Error while retrieving bitmap from " + params[0]);
+        } finally {
+            client.close();
         }
 
-        return "";
+        return null;
     }
 
     public static boolean isInternetAvailable(Context context) {

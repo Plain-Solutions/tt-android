@@ -3,6 +3,8 @@ package org.ssutt.android.activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -30,13 +32,24 @@ public class GroupActivity extends Activity {
 
         ListView groupListView = (ListView) findViewById(R.id.groupListView);
 
-        Intent intent = getIntent();
-        Department department = (Department) intent.getSerializableExtra("department");
-        Group[] groups = getGroups(department.getTag(), GroupMode.ONLY_FILLED);
+        final Department department = (Department) getIntent().getSerializableExtra("department");
+        final Group[] groups = getGroups(department.getTag(), GroupMode.ONLY_FILLED);
         String[] groupNames = processGroups(groups);
 
         ListAdapter groupAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, groupNames);
         groupListView.setAdapter(groupAdapter);
+
+        groupListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                System.out.println(position + " " + groups[position].getName());
+
+                Intent intent = new Intent(getApplicationContext(), ScheduleActivity.class);
+                intent.putExtra("department", department.getTag());
+                intent.putExtra("group", groups[position].getName());
+                startActivity(intent);
+            }
+        });
     }
 
     private String[] processGroups(Group[] groups) {
