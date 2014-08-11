@@ -3,6 +3,7 @@ package org.ssutt.android.activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -27,32 +28,66 @@ import org.ssutt.android.domain.Message;
 import java.util.concurrent.ExecutionException;
 
 public class DepartmentActivity extends Activity {
+    private ListView departmentListView;
+    private SwipeRefreshLayout swipeLayout;
+    private Department[] departments;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.department_view);
-        ListView departmentListView = (ListView) findViewById(R.id.departmentListView);
+        departmentListView = (ListView) findViewById(R.id.departmentListView);
+
+        departmentListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(getApplicationContext(), GroupActivity.class);
+                intent.putExtra("department", departments[position]);
+                startActivity(intent);
+            }
+        });
+
+        swipeLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_container);
+        swipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                if (ApiConnector.isInternetAvailable(getApplicationContext())) {
+                    DepartmentTask scheduleTask = new DepartmentTask();
+                    scheduleTask.execute(ApiRequests.getDepartments());
+                } else {
+                    Toast.makeText(getApplicationContext(), "You have not internet connection!", Toast.LENGTH_LONG).show();
+                    swipeLayout.setRefreshing(false);
+                }
+            }
+        });
+
+        swipeLayout.setColorScheme(android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light,
+                android.R.color.holo_red_light);
 
         if(ApiConnector.isInternetAvailable(this)) {
-            final Department[] departments = getDepartments();
+            DepartmentTask departmentTask = new DepartmentTask();
+            departmentTask.execute(ApiRequests.getDepartments());
+        } else {
+            Toast.makeText(this, "You have not internet connection!", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private class DepartmentTask extends ApiConnector {
+        @Override
+        public void doOnPostExecute(String s) {
+            GsonBuilder gsonBuilder = new GsonBuilder();
+            gsonBuilder.registerTypeAdapter(Department.class, new DepartmentDeserializer());
+            JsonElement jsonElement = new JsonParser().parse(s);
+            JsonArray asJsonArray = jsonElement.getAsJsonArray();
+
+            departments = gsonBuilder.create().fromJson(asJsonArray, Department[].class);
             String[] departmentNames = processDepartments(departments);
 
-            DepartmentListAdapter adapter = new DepartmentListAdapter(this, departmentNames);
+            DepartmentListAdapter adapter = new DepartmentListAdapter(getApplicationContext(), departmentNames);
             departmentListView.setAdapter(adapter);
-
-            departmentListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    System.out.println(position + " " + departments[position].getTag());
-
-                    Intent intent = new Intent(getApplicationContext(), GroupActivity.class);
-                    intent.putExtra("department", departments[position]);
-                    startActivity(intent);
-                }
-            });
-        } else {
-            Toast.makeText(this, "You have not internter connection!", Toast.LENGTH_LONG).show();
+            swipeLayout.setRefreshing(false);
         }
     }
 
@@ -71,26 +106,5 @@ public class DepartmentActivity extends Activity {
         }
 
         return departmentNames;
-    }
-
-
-
-    private Department[] getDepartments() {
-        ApiConnector apiConnector = new ApiConnector();
-        apiConnector.execute(ApiRequests.getDepartments());
-
-        try {
-            GsonBuilder gsonBuilder = new GsonBuilder();
-            gsonBuilder.registerTypeAdapter(Department.class, new DepartmentDeserializer());
-            JsonElement jsonElement = new JsonParser().parse(apiConnector.get());
-            JsonArray asJsonArray = jsonElement.getAsJsonArray();
-            System.out.println(asJsonArray);
-            return gsonBuilder.create().fromJson(asJsonArray, Department[].class);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 }

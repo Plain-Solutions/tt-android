@@ -17,6 +17,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
 import org.ssutt.android.R;
+import org.ssutt.android.adapter.GroupListAdapter;
 import org.ssutt.android.api.ApiConnector;
 import org.ssutt.android.api.ApiRequests;
 import org.ssutt.android.api.GroupMode;
@@ -54,7 +55,7 @@ public class GroupActivity extends Activity {
             public void onRefresh() {
                 if (ApiConnector.isInternetAvailable(getApplicationContext())) {
                     GroupTask scheduleTask = new GroupTask();
-                    scheduleTask.execute(ApiRequests.getGroups(department.getName(), GroupMode.ONLY_FILLED));
+                    scheduleTask.execute(ApiRequests.getGroups(department.getTag(), GroupMode.ONLY_FILLED));
                 } else {
                     Toast.makeText(getApplicationContext(), "You have not internet connection!", Toast.LENGTH_LONG).show();
                     swipeLayout.setRefreshing(false);
@@ -69,7 +70,7 @@ public class GroupActivity extends Activity {
 
         if (ApiConnector.isInternetAvailable(this)) {
             GroupTask scheduleTask = new GroupTask();
-            scheduleTask.execute(ApiRequests.getGroups(department.getName(), GroupMode.ONLY_FILLED));
+            scheduleTask.execute(ApiRequests.getGroups(department.getTag(), GroupMode.ONLY_FILLED));
         } else {
             Toast.makeText(getApplicationContext(), "You have not internet connection!", Toast.LENGTH_LONG).show();
         }
@@ -86,8 +87,9 @@ public class GroupActivity extends Activity {
             Group[] groups = gsonBuilder.create().fromJson(asJsonArray, Group[].class);
             processGroups(groups);
 
-            ListAdapter groupAdapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, groupNames);
+            GroupListAdapter groupAdapter = new GroupListAdapter(getApplicationContext(), groupNames);
             groupListView.setAdapter(groupAdapter);
+            swipeLayout.setRefreshing(false);
         }
     }
 
