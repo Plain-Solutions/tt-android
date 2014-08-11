@@ -23,13 +23,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 public abstract class ApiConnector extends AsyncTask<String, Integer, String> {
-    public abstract void doOnPostExecute(String s);
-
-    @Override
-    protected void onPostExecute(String s) {
-        doOnPostExecute(s);
-    }
-
     @Override
     protected String doInBackground(String... params) {
         final AndroidHttpClient client = AndroidHttpClient.newInstance("Android");

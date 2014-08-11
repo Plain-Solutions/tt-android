@@ -81,7 +81,12 @@ public class ScheduleActivity extends Activity {
 
     private class ScheduleTask extends ApiConnector {
         @Override
-        public void doOnPostExecute(String s) {
+        protected void onPreExecute() {
+            swipeLayout.setRefreshing(true);
+        }
+
+        @Override
+        public void onPostExecute(String s) {
             GsonBuilder gsonBuilder = new GsonBuilder();
             gsonBuilder.registerTypeAdapter(Lesson.class, new LessonDeserializer());
             JsonElement jsonElement = new JsonParser().parse(s);

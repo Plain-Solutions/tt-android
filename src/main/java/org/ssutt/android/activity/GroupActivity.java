@@ -78,7 +78,12 @@ public class GroupActivity extends Activity {
 
     private class GroupTask extends ApiConnector {
         @Override
-        public void doOnPostExecute(String s) {
+        protected void onPreExecute() {
+            swipeLayout.setRefreshing(true);
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
             GsonBuilder gsonBuilder = new GsonBuilder();
             gsonBuilder.registerTypeAdapter(Group.class, new GroupDeserializer());
             JsonElement jsonElement = new JsonParser().parse(s);

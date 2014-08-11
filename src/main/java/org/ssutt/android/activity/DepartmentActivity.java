@@ -76,7 +76,12 @@ public class DepartmentActivity extends Activity {
 
     private class DepartmentTask extends ApiConnector {
         @Override
-        public void doOnPostExecute(String s) {
+        protected void onPreExecute() {
+            swipeLayout.setRefreshing(true);
+        }
+
+        @Override
+        public void onPostExecute(String s) {
             GsonBuilder gsonBuilder = new GsonBuilder();
             gsonBuilder.registerTypeAdapter(Department.class, new DepartmentDeserializer());
             JsonElement jsonElement = new JsonParser().parse(s);
