@@ -4,10 +4,12 @@ import android.app.Activity;
 import android.net.http.AndroidHttpClient;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
+import android.os.Handler;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -19,7 +21,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
 import org.ssutt.android.R;
-import org.ssutt.android.adapter.CustomAdapter;
+import org.ssutt.android.adapter.ScheduleListAdapter;
 import org.ssutt.android.api.ApiConnector;
 import org.ssutt.android.api.ApiRequests;
 import org.ssutt.android.deserializer.LessonDeserializer;
@@ -30,30 +32,44 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
+import java.util.TreeMap;
 
 public class ScheduleActivity extends Activity {
     private static final String[] times = {"08:20 - 09:50", "10:00 - 11:35", "12:05 - 13:40", "13:50 - 15:25", "15:35 - 17:10", "17:20 - 18:40", "18:45 - 20:05", "20:10 - 21:30"};
-    private TextView loadingTextView;
+    private static final String[] day = {"Понедельник", "Вторник", "Среда", "Четверг", "Пятницы", "Суббота"};
     private ListView scheduleListView;
+    private SwipeRefreshLayout swipeLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.schedule_view);
-        loadingTextView = (TextView) findViewById(R.id.loadingTextView);
         scheduleListView = (ListView) findViewById(R.id.scheduleListView);
 
-        String department = getIntent().getStringExtra("department");
-        String group = getIntent().getStringExtra("group");
+        final String department = getIntent().getStringExtra("department");
+        final String group = getIntent().getStringExtra("group");
 
-        //Lesson[] schedule = getSchedule("knt", "151");
-        //ScheduleListAdapter scheduleAdapter = new ScheduleListAdapter(getApplicationContext(), schedule);
-        //scheduleListView.setAdapter(scheduleAdapter);
+        swipeLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_container);
+        swipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                if (ApiConnector.isInternetAvailable(getApplicationContext())) {
+                    ScheduleTask scheduleTask = new ScheduleTask();
+                    scheduleTask.execute(ApiRequests.getSchedule(department, group));
+                } else {
+                    Toast.makeText(getApplicationContext(), "You have not internet connection!", Toast.LENGTH_LONG).show();
+                    swipeLayout.setRefreshing(false);
+                }
+            }
+        });
+
+        swipeLayout.setColorScheme(android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light,
+                android.R.color.holo_red_light);
 
         if (ApiConnector.isInternetAvailable(this)) {
             ScheduleTask scheduleTask = new ScheduleTask();
@@ -63,31 +79,7 @@ public class ScheduleActivity extends Activity {
         }
     }
 
-    private Lesson[] getSchedule(String department, String group) {
-        AsyncTask<String, Integer, String> apiConnector = new ApiConnector();
-        apiConnector.execute(ApiRequests.getSchedule(department, group));
-
-        try {
-            GsonBuilder gsonBuilder = new GsonBuilder();
-            gsonBuilder.registerTypeAdapter(Lesson.class, new LessonDeserializer());
-            JsonElement jsonElement = new JsonParser().parse(apiConnector.get());
-            JsonArray asJsonArray = jsonElement.getAsJsonArray();
-            return gsonBuilder.create().fromJson(asJsonArray, Lesson[].class);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
     private class ScheduleTask extends AsyncTask<String, Integer, String> {
-        @Override
-        protected void onPreExecute() {
-            loadingTextView.setVisibility(View.VISIBLE);
-        }
-
         @Override
         protected String doInBackground(String... params) {
             final AndroidHttpClient client = AndroidHttpClient.newInstance("Android");
@@ -98,7 +90,6 @@ public class ScheduleActivity extends Activity {
                 int statusCode = response.getStatusLine().getStatusCode();
 
                 if (statusCode != HttpStatus.SC_OK) {
-                    Log.w("ImageDownloader", "Error " + statusCode + " while retrieving bitmap from " + params[0]);
                     return null;
                 }
 
@@ -125,7 +116,6 @@ public class ScheduleActivity extends Activity {
                 }
             } catch (Exception e) {
                 getRequest.abort();
-                Log.w("ImageDownloader", "Error while retrieving bitmap from " + params[0]);
             } finally {
                 client.close();
             }
@@ -135,8 +125,6 @@ public class ScheduleActivity extends Activity {
 
         @Override
         protected void onPostExecute(String s) {
-            loadingTextView.setVisibility(View.GONE);
-
             GsonBuilder gsonBuilder = new GsonBuilder();
             gsonBuilder.registerTypeAdapter(Lesson.class, new LessonDeserializer());
             JsonElement jsonElement = new JsonParser().parse(s);
@@ -144,10 +132,10 @@ public class ScheduleActivity extends Activity {
 
             Lesson[] lessons = gsonBuilder.create().fromJson(asJsonArray, Lesson[].class);
 
-            Map<Integer, List<Lesson>> scheduleByDay = new HashMap<Integer, List<Lesson>>();
-            for(Lesson lesson : lessons) {
+            Map<Integer, List<Lesson>> scheduleByDay = new TreeMap<Integer, List<Lesson>>();
+            for (Lesson lesson : lessons) {
                 int day = lesson.getDay();
-                if(!scheduleByDay.containsKey(day)) {
+                if (!scheduleByDay.containsKey(day)) {
                     List<Lesson> lessonList = new ArrayList<Lesson>();
                     lessonList.add(lesson);
                     scheduleByDay.put(day, lessonList);
@@ -156,18 +144,19 @@ public class ScheduleActivity extends Activity {
                 }
             }
 
-            System.out.println(Arrays.toString(lessons));
-            CustomAdapter customAdapter = new CustomAdapter(getApplicationContext());
+            ScheduleListAdapter scheduleListAdapter = new ScheduleListAdapter(getApplicationContext());
 
-            for(Lesson lesson : scheduleByDay.get(0)) {
+            for (Lesson lesson : scheduleByDay.get(0)) {
                 String time = times[lesson.getSequence() - 1];
-                customAdapter.addSectionHeaderItem(time);
+                scheduleListAdapter.addSectionHeaderItem(time);
 
                 for (Subject subject : lesson.getSubject()) {
-                    customAdapter.addItem(subject);
+                    scheduleListAdapter.addItem(subject);
                 }
             }
-            scheduleListView.setAdapter(customAdapter);
+
+            scheduleListView.setAdapter(scheduleListAdapter);
+            swipeLayout.setRefreshing(false);
         }
     }
 }

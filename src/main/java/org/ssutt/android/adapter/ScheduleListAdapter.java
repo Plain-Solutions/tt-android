@@ -5,55 +5,101 @@ import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import org.ssutt.android.R;
-import org.ssutt.android.domain.Lesson.Lesson;
-import org.ssutt.android.domain.Lesson.Subgroup;
 import org.ssutt.android.domain.Lesson.Subject;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeSet;
 
-public class ScheduleListAdapter extends ArrayAdapter<Lesson> {
-    private static final String[] times = {"08:20 - 09:50", "10:00 - 11:35", "12:05 - 13:40", "13:50 - 15:25", "15:35 - 17:10", "17:20 - 18:40", "18:45 - 20:05", "20:10 - 21:30"};
+public class ScheduleListAdapter extends BaseAdapter {
+    private static final int TYPE_ITEM = 0;
+    private static final int TYPE_SEPARATOR = 1;
 
-    public ScheduleListAdapter(Context context, Lesson[] lessons) {
-        super(context, R.layout.schedule_view_list_item, lessons);
+    private List mData = new ArrayList();
+    private TreeSet<Integer> sectionHeader = new TreeSet<Integer>();
+
+    private LayoutInflater mInflater;
+
+    public ScheduleListAdapter(Context context) {
+        mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    }
+
+    public void addItem(Subject item) {
+        mData.add(item);
+        notifyDataSetChanged();
+    }
+
+    public void addSectionHeaderItem(final String item) {
+        mData.add(item);
+        sectionHeader.add(mData.size() - 1);
+        notifyDataSetChanged();
     }
 
     @Override
+    public int getItemViewType(int position) {
+        return sectionHeader.contains(position) ? TYPE_SEPARATOR : TYPE_ITEM;
+    }
+
+    @Override
+    public int getViewTypeCount() {
+        return 2;
+    }
+
+    @Override
+    public int getCount() {
+        return mData.size();
+    }
+
+    @Override
+    public String getItem(int position) {
+        return mData.get(position).toString();
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
     public View getView(int position, View convertView, ViewGroup parent) {
-        View view = convertView;
+        int rowType = getItemViewType(position);
 
-        if (view == null) {
-            LayoutInflater vi = LayoutInflater.from(getContext());
-            view = vi.inflate(R.layout.schedule_view_list_item, null);
-        }
+        if (convertView == null) {
+            switch (rowType) {
+                case TYPE_ITEM:
+                    convertView = mInflater.inflate(R.layout.schedule_view_list_item, null);
 
-        Lesson item = getItem(position);
-        if (item != null) {
-            Subject subject = item.getSubject().get(0);
-            List<Subgroup> subgroup = subject.getSubgroup();
+                    TextView subjectTextView = (TextView) convertView.findViewById(R.id.subjectTextView);
+                    TextView locationTextView = (TextView) convertView.findViewById(R.id.locationTextView);
+                    TextView subjectTypeTextView = (TextView) convertView.findViewById(R.id.subjectTypeTextView);
+                    View lectureTypeView = convertView.findViewById(R.id.lectureTypeView);
 
-            View lectureColorView = view.findViewById(R.id.lectureTypeView);
-            if (subject.getActivity().equals("practice")) {
-                lectureColorView.setBackgroundColor(Color.parseColor("#4cd964"));
-            } else {
-                lectureColorView.setBackgroundColor(Color.parseColor("#ff5e3a"));
+                    Subject subject = (Subject) mData.get(position);
+                    subjectTextView.setText(subject.getName());
+                    locationTextView.setText(subject.getSubgroup().size() == 1 ? subject.getSubgroup().get(0).getLocation() : "Multiply value");
+                    subjectTypeTextView.setText(subject.getActivity());
+
+                    if(subject.getActivity().equals("lecture")) {
+                        lectureTypeView.setBackgroundColor(Color.parseColor("#ff5e3a"));
+                    } else {
+                        lectureTypeView.setBackgroundColor(Color.parseColor("#4cd964"));
+                    }
+
+                    break;
+
+                case TYPE_SEPARATOR:
+                    convertView = mInflater.inflate(R.layout.schedule_view_list_header, null);
+                    TextView timeTextView = (TextView) convertView.findViewById(R.id.textView);
+
+                    String time = (String) mData.get(position);
+                    timeTextView.setText(time);
+                    break;
             }
-
-            TextView timeTextView = (TextView) view.findViewById(R.id.subjectTextView);
-            TextView subjectTextView = (TextView) view.findViewById(R.id.subjectTextView);
-            TextView locationTextView = (TextView) view.findViewById(R.id.locationTextView);
-            TextView typeTextView = (TextView) view.findViewById(R.id.subjectTypeTextView);
-
-            timeTextView.setText(times[item.getSequence() - 1]);
-            subjectTextView.setText(subject.getName());
-            locationTextView.setText(subgroup.size() == 1 ? subgroup.get(0).getLocation() : "Multiply value");
-            typeTextView.setText(subject.getActivity());
         }
 
-        return view;
+        return convertView;
     }
 }
