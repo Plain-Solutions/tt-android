@@ -75,56 +75,13 @@ public class ScheduleActivity extends Activity {
             ScheduleTask scheduleTask = new ScheduleTask();
             scheduleTask.execute(ApiRequests.getSchedule(department, group));
         } else {
-            System.out.println("You have not internet connection!");
+            Toast.makeText(getApplicationContext(), "You have not internet connection!", Toast.LENGTH_LONG).show();
         }
     }
 
-    private class ScheduleTask extends AsyncTask<String, Integer, String> {
+    private class ScheduleTask extends ApiConnector {
         @Override
-        protected String doInBackground(String... params) {
-            final AndroidHttpClient client = AndroidHttpClient.newInstance("Android");
-            final HttpGet getRequest = new HttpGet(params[0]);
-
-            try {
-                HttpResponse response = client.execute(getRequest);
-                int statusCode = response.getStatusLine().getStatusCode();
-
-                if (statusCode != HttpStatus.SC_OK) {
-                    return null;
-                }
-
-                HttpEntity entity = response.getEntity();
-                if (entity != null) {
-                    InputStream inputStream = null;
-                    try {
-                        inputStream = entity.getContent();
-                        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-
-                        StringBuilder json = new StringBuilder();
-                        String line;
-                        while ((line = reader.readLine()) != null) {
-                            json.append(line);
-                        }
-
-                        return json.toString();
-                    } finally {
-                        if (inputStream != null) {
-                            inputStream.close();
-                        }
-                        entity.consumeContent();
-                    }
-                }
-            } catch (Exception e) {
-                getRequest.abort();
-            } finally {
-                client.close();
-            }
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
+        public void doOnPostExecute(String s) {
             GsonBuilder gsonBuilder = new GsonBuilder();
             gsonBuilder.registerTypeAdapter(Lesson.class, new LessonDeserializer());
             JsonElement jsonElement = new JsonParser().parse(s);

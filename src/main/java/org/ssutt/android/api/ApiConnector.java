@@ -22,7 +22,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-public class ApiConnector extends AsyncTask<String, Integer, String> {
+public abstract class ApiConnector extends AsyncTask<String, Integer, String> {
+    public abstract void doOnPostExecute(String s);
+
+    @Override
+    protected void onPostExecute(String s) {
+        doOnPostExecute(s);
+    }
+
     @Override
     protected String doInBackground(String... params) {
         final AndroidHttpClient client = AndroidHttpClient.newInstance("Android");
@@ -33,7 +40,6 @@ public class ApiConnector extends AsyncTask<String, Integer, String> {
             int statusCode = response.getStatusLine().getStatusCode();
 
             if (statusCode != HttpStatus.SC_OK) {
-                Log.w("ImageDownloader", "Error " + statusCode + " while retrieving bitmap from " + params[0]);
                 return null;
             }
 
@@ -49,7 +55,6 @@ public class ApiConnector extends AsyncTask<String, Integer, String> {
                     while((line = reader.readLine()) != null) {
                         json.append(line);
                     }
-
                     return  json.toString();
                 } finally {
                     if (inputStream != null) {
@@ -60,7 +65,6 @@ public class ApiConnector extends AsyncTask<String, Integer, String> {
             }
         } catch (Exception e) {
             getRequest.abort();
-            Log.w("ImageDownloader", "Error while retrieving bitmap from " + params[0]);
         } finally {
             client.close();
         }

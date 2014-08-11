@@ -93,22 +93,4 @@ public class DepartmentActivity extends Activity {
         }
         return null;
     }
-
-    private Message getMsg(String departmentTag) {
-        ApiConnector apiConnector = new ApiConnector();
-        apiConnector.execute(ApiRequests.getDepartmentMsg(departmentTag));
-
-        try {
-            GsonBuilder gsonBuilder = new GsonBuilder();
-            gsonBuilder.registerTypeAdapter(Message.class, new MessageDeserializer());
-            JsonElement jsonElement = new JsonParser().parse(apiConnector.get());
-
-            return gsonBuilder.create().fromJson(jsonElement, Message.class);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 }
