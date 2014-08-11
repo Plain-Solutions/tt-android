@@ -1,14 +1,9 @@
-package org.ssutt.android.activity;
+package org.ssutt.android.activity.schedule_activity;
 
 import android.app.Activity;
-import android.net.http.AndroidHttpClient;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.view.View;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.GsonBuilder;
@@ -16,10 +11,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpGet;
 import org.ssutt.android.R;
 import org.ssutt.android.adapter.ScheduleListAdapter;
 import org.ssutt.android.api.ApiConnector;
@@ -28,18 +19,13 @@ import org.ssutt.android.deserializer.LessonDeserializer;
 import org.ssutt.android.domain.Lesson.Lesson;
 import org.ssutt.android.domain.Lesson.Subject;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
 public class ScheduleActivity extends Activity {
     private static final String[] times = {"08:20 - 09:50", "10:00 - 11:35", "12:05 - 13:40", "13:50 - 15:25", "15:35 - 17:10", "17:20 - 18:40", "18:45 - 20:05", "20:10 - 21:30"};
-    private static final String[] day = {"Понедельник", "Вторник", "Среда", "Четверг", "Пятницы", "Суббота"};
     private ListView scheduleListView;
     private SwipeRefreshLayout swipeLayout;
 

@@ -6,8 +6,6 @@ import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -17,6 +15,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
 import org.ssutt.android.R;
+import org.ssutt.android.activity.schedule_activity.ScheduleActivity;
+import org.ssutt.android.activity.schedule_activity.ViewPagerFragmentActivity;
 import org.ssutt.android.adapter.GroupListAdapter;
 import org.ssutt.android.api.ApiConnector;
 import org.ssutt.android.api.ApiRequests;
@@ -24,8 +24,6 @@ import org.ssutt.android.api.GroupMode;
 import org.ssutt.android.deserializer.GroupDeserializer;
 import org.ssutt.android.domain.Department;
 import org.ssutt.android.domain.Group;
-
-import java.util.concurrent.ExecutionException;
 
 public class GroupActivity extends Activity {
     private SwipeRefreshLayout swipeLayout;
@@ -43,7 +41,8 @@ public class GroupActivity extends Activity {
         groupListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(getApplicationContext(), ScheduleActivity.class);
+                //Intent intent = new Intent(getApplicationContext(), ScheduleActivity.class);
+                Intent intent = new Intent(getApplicationContext(), ViewPagerFragmentActivity.class);
                 intent.putExtra("department", department.getTag());
                 intent.putExtra("group", groupNames[position]);
                 startActivity(intent);
