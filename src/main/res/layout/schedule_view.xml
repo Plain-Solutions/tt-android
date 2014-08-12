@@ -11,7 +11,7 @@
         android:id="@+id/daysSpinner"
         android:spinnerMode="dropdown"
         android:gravity="center|center_vertical|center_horizontal"
-        android:layout_gravity="center" />
+        android:layout_gravity="center|top" />
 
     <android.support.v4.view.ViewPager
         android:id="@+id/viewpager"
@@ -20,4 +20,27 @@
         android:layout_marginTop="10dp"
         android:layout_weight="0.95" />
 
+    <info.hoang8f.android.segmented.SegmentedGroup
+        android:id="@+id/segmentedGroup"
+        android:layout_width="match_parent"
+        android:layout_height="58dp"
+        android:layout_margin="10dp"
+        android:orientation="horizontal"
+        android:gravity="center|center_horizontal">
+
+        <RadioButton
+            android:id="@+id/btnEven"
+            android:layout_weight="1"
+            android:layout_height="40dp"
+            android:text="Even"
+            style="@style/RadioButton" />
+
+        <RadioButton
+            android:id="@+id/btnOdd"
+            android:layout_weight="1"
+            android:layout_height="40dp"
+            android:text="Odd"
+            style="@style/RadioButton"
+            android:checked="false" />
+    </info.hoang8f.android.segmented.SegmentedGroup>
 </LinearLayout>
