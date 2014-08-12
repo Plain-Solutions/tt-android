@@ -1,28 +1,24 @@
 package org.ssutt.android.api;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.http.AndroidHttpClient;
 import android.os.AsyncTask;
-import android.util.Log;
+import android.widget.Toast;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.StatusLine;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
 public abstract class ApiConnector extends AsyncTask<String, Integer, String> {
+    private static final String errorMessage = "При загрузке данных произошла ошибка. Проверьте Ваше подключение к сети.";
+
     @Override
     protected String doInBackground(String... params) {
         final AndroidHttpClient client = AndroidHttpClient.newInstance("Android");
@@ -45,10 +41,10 @@ public abstract class ApiConnector extends AsyncTask<String, Integer, String> {
 
                     StringBuilder json = new StringBuilder();
                     String line;
-                    while((line = reader.readLine()) != null) {
+                    while ((line = reader.readLine()) != null) {
                         json.append(line);
                     }
-                    return  json.toString();
+                    return json.toString();
                 } finally {
                     if (inputStream != null) {
                         inputStream.close();
@@ -69,5 +65,9 @@ public abstract class ApiConnector extends AsyncTask<String, Integer, String> {
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
         return networkInfo != null && networkInfo.isConnectedOrConnecting();
+    }
+
+    public static void errorToast(Context context) {
+        Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show();
     }
 }

@@ -45,9 +45,12 @@ public class Subgroup {
 
         Subgroup subgroup1 = (Subgroup) o;
 
-        if (location != null ? !location.equals(subgroup1.location) : subgroup1.location != null) return false;
-        if (subgroup != null ? !subgroup.equals(subgroup1.subgroup) : subgroup1.subgroup != null) return false;
-        if (teacher != null ? !teacher.equals(subgroup1.teacher) : subgroup1.teacher != null) return false;
+        if (location != null ? !location.equals(subgroup1.location) : subgroup1.location != null)
+            return false;
+        if (subgroup != null ? !subgroup.equals(subgroup1.subgroup) : subgroup1.subgroup != null)
+            return false;
+        if (teacher != null ? !teacher.equals(subgroup1.teacher) : subgroup1.teacher != null)
+            return false;
 
         return true;
     }

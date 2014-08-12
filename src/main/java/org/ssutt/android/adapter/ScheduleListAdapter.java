@@ -82,7 +82,7 @@ public class ScheduleListAdapter extends BaseAdapter {
                     locationTextView.setText(subject.getSubgroup().size() == 1 ? subject.getSubgroup().get(0).getLocation() : "Multiply value");
                     subjectTypeTextView.setText(subject.getActivity());
 
-                    if(subject.getActivity().equals("lecture")) {
+                    if (subject.getActivity().equals("lecture")) {
                         lectureTypeView.setBackgroundColor(Color.parseColor("#ff5e3a"));
                     } else {
                         lectureTypeView.setBackgroundColor(Color.parseColor("#4cd964"));

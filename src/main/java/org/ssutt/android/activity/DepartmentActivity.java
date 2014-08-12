@@ -1,6 +1,7 @@
 package org.ssutt.android.activity;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -19,30 +20,31 @@ import org.ssutt.android.adapter.DepartmentListAdapter;
 import org.ssutt.android.api.ApiConnector;
 import org.ssutt.android.api.ApiRequests;
 import org.ssutt.android.deserializer.DepartmentDeserializer;
-import org.ssutt.android.deserializer.LessonDeserializer;
-import org.ssutt.android.deserializer.MessageDeserializer;
 import org.ssutt.android.domain.Department;
-import org.ssutt.android.domain.Lesson.Lesson;
-import org.ssutt.android.domain.Message;
 
-import java.util.concurrent.ExecutionException;
+import static org.ssutt.android.api.ApiConnector.*;
+import static org.ssutt.android.api.ApiConnector.errorToast;
 
 public class DepartmentActivity extends Activity {
+    private static final String DEPARTMENT = "department";;
+
     private ListView departmentListView;
     private SwipeRefreshLayout swipeLayout;
     private Department[] departments;
+    private Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.department_view);
         departmentListView = (ListView) findViewById(R.id.departmentListView);
+        context = this;
 
         departmentListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(getApplicationContext(), GroupActivity.class);
-                intent.putExtra("department", departments[position]);
+                Intent intent = new Intent(context, GroupActivity.class);
+                intent.putExtra(DEPARTMENT, departments[position]);
                 startActivity(intent);
             }
         });
@@ -51,11 +53,11 @@ public class DepartmentActivity extends Activity {
         swipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                if (ApiConnector.isInternetAvailable(getApplicationContext())) {
+                if (isInternetAvailable(context)) {
                     DepartmentTask scheduleTask = new DepartmentTask();
                     scheduleTask.execute(ApiRequests.getDepartments());
                 } else {
-                    Toast.makeText(getApplicationContext(), "You have not internet connection!", Toast.LENGTH_LONG).show();
+                    errorToast(context);
                     swipeLayout.setRefreshing(false);
                 }
             }
@@ -66,11 +68,11 @@ public class DepartmentActivity extends Activity {
                 android.R.color.holo_orange_light,
                 android.R.color.holo_red_light);
 
-        if(ApiConnector.isInternetAvailable(this)) {
+        if (isInternetAvailable(context)) {
             DepartmentTask departmentTask = new DepartmentTask();
             departmentTask.execute(ApiRequests.getDepartments());
         } else {
-            Toast.makeText(this, "You have not internet connection!", Toast.LENGTH_LONG).show();
+            errorToast(context);
         }
     }
 
@@ -90,7 +92,7 @@ public class DepartmentActivity extends Activity {
             departments = gsonBuilder.create().fromJson(asJsonArray, Department[].class);
             String[] departmentNames = processDepartments(departments);
 
-            DepartmentListAdapter adapter = new DepartmentListAdapter(getApplicationContext(), departmentNames);
+            DepartmentListAdapter adapter = new DepartmentListAdapter(context, departmentNames);
             departmentListView.setAdapter(adapter);
             swipeLayout.setRefreshing(false);
         }

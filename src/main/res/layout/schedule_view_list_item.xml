@@ -14,11 +14,12 @@
         android:orientation="horizontal"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent">
+
         <View
             android:layout_width="15dp"
             android:layout_height="match_parent"
             android:id="@+id/lectureTypeView"
-            android:background="@color/green"/>
+            android:background="@color/green" />
 
         <LinearLayout
             android:orientation="vertical"

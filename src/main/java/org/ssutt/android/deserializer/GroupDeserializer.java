@@ -9,7 +9,7 @@ import org.ssutt.android.domain.Group;
 
 import java.lang.reflect.Type;
 
-public class GroupDeserializer implements JsonDeserializer<Group>{
+public class GroupDeserializer implements JsonDeserializer<Group> {
 
     @Override
     public Group deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {

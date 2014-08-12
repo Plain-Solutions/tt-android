@@ -1,110 +1,76 @@
 package org.ssutt.android.activity.schedule_activity;
 
-import android.app.Activity;
 import android.os.Bundle;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.widget.ListView;
-import android.widget.Toast;
-
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.view.ViewPager;
 
 import org.ssutt.android.R;
-import org.ssutt.android.adapter.ScheduleListAdapter;
-import org.ssutt.android.api.ApiConnector;
-import org.ssutt.android.api.ApiRequests;
-import org.ssutt.android.deserializer.LessonDeserializer;
-import org.ssutt.android.domain.Lesson.Lesson;
-import org.ssutt.android.domain.Lesson.Subject;
+import org.ssutt.android.activity.schedule_activity.tabs.AbstractTab;
+import org.ssutt.android.activity.schedule_activity.tabs.TabFriday;
+import org.ssutt.android.activity.schedule_activity.tabs.TabMonday;
+import org.ssutt.android.activity.schedule_activity.tabs.TabSaturday;
+import org.ssutt.android.activity.schedule_activity.tabs.TabThursday;
+import org.ssutt.android.activity.schedule_activity.tabs.TabTuesday;
+import org.ssutt.android.activity.schedule_activity.tabs.TabWednesday;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
-public class ScheduleActivity extends Activity {
-    private static final String[] times = {"08:20 - 09:50", "10:00 - 11:35", "12:05 - 13:40", "13:50 - 15:25", "15:35 - 17:10", "17:20 - 18:40", "18:45 - 20:05", "20:10 - 21:30"};
-    private ListView scheduleListView;
-    private SwipeRefreshLayout swipeLayout;
+public class ScheduleActivity extends FragmentActivity implements ViewPager.OnPageChangeListener {
+    private PagerAdapter mPagerAdapter;
+    private ViewPager pager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.schedule_view);
-        scheduleListView = (ListView) findViewById(R.id.scheduleListView);
-
-        final String department = getIntent().getStringExtra("department");
-        final String group = getIntent().getStringExtra("group");
-
-        swipeLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_container);
-        swipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                if (ApiConnector.isInternetAvailable(getApplicationContext())) {
-                    ScheduleTask scheduleTask = new ScheduleTask();
-                    scheduleTask.execute(ApiRequests.getSchedule(department, group));
-                } else {
-                    Toast.makeText(getApplicationContext(), "You have not internet connection!", Toast.LENGTH_LONG).show();
-                    swipeLayout.setRefreshing(false);
-                }
-            }
-        });
-
-        swipeLayout.setColorScheme(android.R.color.holo_blue_bright,
-                android.R.color.holo_green_light,
-                android.R.color.holo_orange_light,
-                android.R.color.holo_red_light);
-
-        if (ApiConnector.isInternetAvailable(this)) {
-            ScheduleTask scheduleTask = new ScheduleTask();
-            scheduleTask.execute(ApiRequests.getSchedule(department, group));
-        } else {
-            Toast.makeText(getApplicationContext(), "You have not internet connection!", Toast.LENGTH_LONG).show();
-        }
+        super.setContentView(R.layout.viewpager_layout);
+        this.initialisePaging();
     }
 
-    private class ScheduleTask extends ApiConnector {
-        @Override
-        protected void onPreExecute() {
-            swipeLayout.setRefreshing(true);
+    private void initialisePaging() {
+        List<Fragment> fragments = new ArrayList<Fragment>();
+        List<Class<? extends AbstractTab>> tabClasses = Arrays.asList(
+                TabMonday.class,
+                TabTuesday.class,
+                TabWednesday.class,
+                TabThursday.class,
+                TabFriday.class,
+                TabSaturday.class);
+
+        for (Class cur : tabClasses) {
+            fragments.add(Fragment.instantiate(this, cur.getName()));
         }
 
-        @Override
-        public void onPostExecute(String s) {
-            GsonBuilder gsonBuilder = new GsonBuilder();
-            gsonBuilder.registerTypeAdapter(Lesson.class, new LessonDeserializer());
-            JsonElement jsonElement = new JsonParser().parse(s);
-            JsonArray asJsonArray = jsonElement.getAsJsonArray();
+        this.mPagerAdapter = new PagerAdapter(super.getSupportFragmentManager(), fragments);
+        pager = (ViewPager) super.findViewById(R.id.viewpager);
+        pager.setAdapter(this.mPagerAdapter);
+        pager.setOnPageChangeListener(this);
+        pager.setCurrentItem(0, false);
+    }
 
-            Lesson[] lessons = gsonBuilder.create().fromJson(asJsonArray, Lesson[].class);
+    @Override
+    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 
-            Map<Integer, List<Lesson>> scheduleByDay = new TreeMap<Integer, List<Lesson>>();
-            for (Lesson lesson : lessons) {
-                int day = lesson.getDay();
-                if (!scheduleByDay.containsKey(day)) {
-                    List<Lesson> lessonList = new ArrayList<Lesson>();
-                    lessonList.add(lesson);
-                    scheduleByDay.put(day, lessonList);
-                } else {
-                    scheduleByDay.get(day).add(lesson);
-                }
+    }
+
+    @Override
+    public void onPageSelected(int position) {
+
+    }
+
+    @Override
+    public void onPageScrollStateChanged(int state) {
+        /*if (state == ViewPager.SCROLL_STATE_IDLE) {
+            int current = pager.getCurrentItem();
+            int lastReal = pager.getAdapter().getCount() - 2;
+
+            if (current == 0) {
+                pager.setCurrentItem(lastReal, false);
+            } else if (current > lastReal) {
+                pager.setCurrentItem(1, false);
             }
-
-            ScheduleListAdapter scheduleListAdapter = new ScheduleListAdapter(getApplicationContext());
-
-            for (Lesson lesson : scheduleByDay.get(0)) {
-                String time = times[lesson.getSequence() - 1];
-                scheduleListAdapter.addSectionHeaderItem(time);
-
-                for (Subject subject : lesson.getSubject()) {
-                    scheduleListAdapter.addItem(subject);
-                }
-            }
-
-            scheduleListView.setAdapter(scheduleListAdapter);
-            swipeLayout.setRefreshing(false);
-        }
+        }*/
     }
 }

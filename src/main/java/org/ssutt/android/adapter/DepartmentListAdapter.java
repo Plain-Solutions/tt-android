@@ -18,13 +18,13 @@ public class DepartmentListAdapter extends ArrayAdapter<String> {
     public View getView(int position, View convertView, ViewGroup parent) {
         View view = convertView;
 
-        if(view == null) {
+        if (view == null) {
             LayoutInflater vi = LayoutInflater.from(getContext());
             view = vi.inflate(R.layout.department_view_list_item, null);
         }
 
         String item = getItem(position);
-        if(item != null) {
+        if (item != null) {
             TextView label = (TextView) view.findViewById(R.id.departmentLabel);
             label.setText(item);
         }

@@ -58,9 +58,11 @@ public class Subject {
         Subject subject = (Subject) o;
 
         if (parity != subject.parity) return false;
-        if (activity != null ? !activity.equals(subject.activity) : subject.activity != null) return false;
+        if (activity != null ? !activity.equals(subject.activity) : subject.activity != null)
+            return false;
         if (name != null ? !name.equals(subject.name) : subject.name != null) return false;
-        if (subgroup != null ? !subgroup.equals(subject.subgroup) : subject.subgroup != null) return false;
+        if (subgroup != null ? !subgroup.equals(subject.subgroup) : subject.subgroup != null)
+            return false;
 
         return true;
     }

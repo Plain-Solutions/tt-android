@@ -18,7 +18,6 @@
             </intent-filter>
         </activity>
         <activity android:name=".activity.GroupActivity" />
-        <activity android:name=".activity.schedule_activity.ViewPagerFragmentActivity" />
         <activity android:name=".activity.schedule_activity.ScheduleActivity" />
     </application>
 

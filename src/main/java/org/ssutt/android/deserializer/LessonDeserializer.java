@@ -1,6 +1,10 @@
 package org.ssutt.android.deserializer;
 
-import com.google.gson.*;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 
 import org.ssutt.android.domain.Lesson.Lesson;
 import org.ssutt.android.domain.Lesson.Subgroup;
@@ -10,7 +14,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LessonDeserializer implements JsonDeserializer<Lesson>{
+public class LessonDeserializer implements JsonDeserializer<Lesson> {
     @Override
     public Lesson deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
         Lesson lesson = new Lesson();

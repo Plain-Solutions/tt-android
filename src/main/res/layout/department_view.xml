@@ -25,6 +25,6 @@
             android:layout_height="wrap_content"
             android:id="@+id/departmentListView"
             android:choiceMode="singleChoice"
-            android:dividerHeight="5dp"/>
+            android:dividerHeight="5dp" />
     </android.support.v4.widget.SwipeRefreshLayout>
 </LinearLayout>

@@ -64,7 +64,8 @@ public class Lesson {
 
         if (day != lesson.day) return false;
         if (sequence != lesson.sequence) return false;
-        if (subject != null ? !subject.equals(lesson.subject) : lesson.subject != null) return false;
+        if (subject != null ? !subject.equals(lesson.subject) : lesson.subject != null)
+            return false;
 
         return true;
     }
