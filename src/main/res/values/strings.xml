@@ -4,6 +4,9 @@
     <string name="app_name">SSU Timetables</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="even">Числитель</string>
+    <string name="odd">Знаменатель</string>
+
     <color name="red">#ff5e3a</color>
     <color name="green">#4cd964</color>
     <color name="gray">#dedede</color>

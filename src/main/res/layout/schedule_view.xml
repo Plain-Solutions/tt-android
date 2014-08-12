@@ -21,7 +21,7 @@
         android:layout_weight="0.95" />
 
     <info.hoang8f.android.segmented.SegmentedGroup
-        android:id="@+id/segmentedGroup"
+        android:id="@+id/evenOddSegment"
         android:layout_width="match_parent"
         android:layout_height="58dp"
         android:layout_margin="10dp"
@@ -32,14 +32,14 @@
             android:id="@+id/btnEven"
             android:layout_weight="1"
             android:layout_height="40dp"
-            android:text="Even"
+            android:text="@string/even"
             style="@style/RadioButton" />
 
         <RadioButton
             android:id="@+id/btnOdd"
             android:layout_weight="1"
             android:layout_height="40dp"
-            android:text="Odd"
+            android:text="@string/odd"
             style="@style/RadioButton"
             android:checked="false" />
     </info.hoang8f.android.segmented.SegmentedGroup>

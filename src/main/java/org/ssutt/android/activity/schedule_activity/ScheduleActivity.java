@@ -5,7 +5,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.widget.ArrayAdapter;
-import android.widget.ListAdapter;
+import android.widget.RadioGroup;
 import android.widget.Spinner;
 
 import org.ssutt.android.R;
@@ -20,6 +20,8 @@ import org.ssutt.android.activity.schedule_activity.tabs.TabWednesday;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import info.hoang8f.android.segmented.SegmentedGroup;
 
 public class ScheduleActivity extends FragmentActivity implements ViewPager.OnPageChangeListener {
     private PagerAdapter mPagerAdapter;
@@ -56,6 +58,16 @@ public class ScheduleActivity extends FragmentActivity implements ViewPager.OnPa
         ArrayAdapter adapter = ArrayAdapter.createFromResource(this, R.array.days_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         daysSpinner.setAdapter(adapter);
+
+        SegmentedGroup evenOddSegment = (SegmentedGroup) findViewById(R.id.evenOddSegment);
+        evenOddSegment.check(R.id.btnEven);
+
+        evenOddSegment.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                System.out.println(R.id.btnEven == checkedId ? "even" : "odd");
+            }
+        });
     }
 
     @Override
