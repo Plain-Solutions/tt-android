@@ -7,4 +7,13 @@
     <color name="red">#ff5e3a</color>
     <color name="green">#4cd964</color>
     <color name="gray">#dedede</color>
+
+    <string-array name="days_array">
+        <item>Понедельник</item>
+        <item>Вторник</item>
+        <item>Среда</item>
+        <item>Четверг</item>
+        <item>Пятница</item>
+        <item>Суббота</item>
+    </string-array>
 </resources>

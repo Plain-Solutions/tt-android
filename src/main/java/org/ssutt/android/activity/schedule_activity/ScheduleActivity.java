@@ -4,6 +4,9 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
+import android.widget.ArrayAdapter;
+import android.widget.ListAdapter;
+import android.widget.Spinner;
 
 import org.ssutt.android.R;
 import org.ssutt.android.activity.schedule_activity.tabs.AbstractTab;
@@ -25,7 +28,7 @@ public class ScheduleActivity extends FragmentActivity implements ViewPager.OnPa
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        super.setContentView(R.layout.viewpager_layout);
+        super.setContentView(R.layout.schedule_view);
         this.initialisePaging();
     }
 
@@ -48,6 +51,11 @@ public class ScheduleActivity extends FragmentActivity implements ViewPager.OnPa
         pager.setAdapter(this.mPagerAdapter);
         pager.setOnPageChangeListener(this);
         pager.setCurrentItem(0, false);
+
+        Spinner daysSpinner = (Spinner) findViewById(R.id.daysSpinner);
+        ArrayAdapter adapter = ArrayAdapter.createFromResource(this, R.array.days_array, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        daysSpinner.setAdapter(adapter);
     }
 
     @Override
