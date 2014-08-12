@@ -24,9 +24,9 @@
         android:id="@+id/evenOddSegment"
         android:layout_width="match_parent"
         android:layout_height="58dp"
-        android:layout_margin="10dp"
         android:orientation="horizontal"
-        android:gravity="center|center_horizontal">
+        android:gravity="center|center_horizontal"
+        android:layout_margin="10dp">
 
         <RadioButton
             android:id="@+id/btnEven"

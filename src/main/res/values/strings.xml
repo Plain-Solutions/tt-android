@@ -6,6 +6,8 @@
     <string name="action_settings">Settings</string>
     <string name="even">Числитель</string>
     <string name="odd">Знаменатель</string>
+    <string name="chooseDepartment">Выберите факультет:</string>
+    <string name="chooseGroup">Выберите группу:</string>
 
     <color name="red">#ff5e3a</color>
     <color name="green">#4cd964</color>
