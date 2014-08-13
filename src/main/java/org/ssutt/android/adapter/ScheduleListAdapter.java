@@ -16,8 +16,8 @@ import java.util.List;
 import java.util.TreeSet;
 
 public class ScheduleListAdapter extends BaseAdapter {
-    private static final int TYPE_ITEM = 0;
-    private static final int TYPE_SEPARATOR = 1;
+    public static final int TYPE_ITEM = 0;
+    public static final int TYPE_SEPARATOR = 1;
 
     private List mData = new ArrayList();
     private TreeSet<Integer> sectionHeader = new TreeSet<Integer>();

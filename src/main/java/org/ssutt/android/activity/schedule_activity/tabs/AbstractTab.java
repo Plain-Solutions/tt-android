@@ -8,8 +8,8 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -25,22 +25,23 @@ import org.ssutt.android.domain.Lesson.Lesson;
 import org.ssutt.android.domain.Lesson.Subject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
-import static org.ssutt.android.api.ApiConnector.*;
+import static org.ssutt.android.adapter.ScheduleListAdapter.TYPE_ITEM;
+import static org.ssutt.android.adapter.ScheduleListAdapter.TYPE_SEPARATOR;
+import static org.ssutt.android.api.ApiConnector.errorToast;
+import static org.ssutt.android.api.ApiConnector.isInternetAvailable;
 
 public abstract class AbstractTab extends Fragment {
     private static final String[] times = {"08:20 - 09:50", "10:00 - 11:35", "12:05 - 13:40", "13:50 - 15:25", "15:35 - 17:10", "17:20 - 18:40", "18:45 - 20:05", "20:10 - 21:30"};
-    private static final String DEPARTMENT = "department";;
+    private static final String DEPARTMENT = "department";
     private static final String GROUP = "group";
 
     private ListView scheduleListView;
     private SwipeRefreshLayout swipeLayout;
     private Context context;
-
-    public abstract int getLayoutId();
 
     public abstract int getDayOfWeek();
 
@@ -49,13 +50,29 @@ public abstract class AbstractTab extends Fragment {
             return null;
         }
 
-        View view = inflater.inflate(getLayoutId(), container, false);
+        View view = inflater.inflate(R.layout.schedule_view_list, container, false);
         context = getActivity().getApplicationContext();
         scheduleListView = (ListView) view.findViewById(R.id.scheduleListView);
 
         Intent intent = getActivity().getIntent();
         final String department = intent.getStringExtra(DEPARTMENT);
         final String group = intent.getStringExtra(GROUP);
+
+        scheduleListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                System.out.println(parent.getAdapter().getItem(position));
+
+                switch (parent.getAdapter().getItemViewType(position)) {
+                    case TYPE_ITEM:
+                        System.out.println("subject");
+                        break;
+                    case TYPE_SEPARATOR:
+                        System.out.println("time");
+                        break;
+                }
+            }
+        });
 
         swipeLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_container);
         swipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -101,7 +118,7 @@ public abstract class AbstractTab extends Fragment {
 
             Lesson[] lessons = gsonBuilder.create().fromJson(asJsonArray, Lesson[].class);
 
-            Map<Integer, List<Lesson>> scheduleByDay = new TreeMap<Integer, List<Lesson>>();
+            Map<Integer, List<Lesson>> scheduleByDay = new HashMap<Integer, List<Lesson>>();
             for (Lesson lesson : lessons) {
                 int day = lesson.getDay();
                 if (!scheduleByDay.containsKey(day)) {
