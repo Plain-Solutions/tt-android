@@ -27,7 +27,6 @@ public abstract class ApiRequests {
     }
 
     public static String getSchedule(String departmentTag, String groupName) {
-        System.out.println(format(SCHEDULE, departmentTag, groupName));
         return format(SCHEDULE, departmentTag, groupName);
     }
 }

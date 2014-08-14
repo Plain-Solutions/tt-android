@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import static android.support.v4.view.ViewPager.*;
 import static org.ssutt.android.activity.schedule_activity.tabs.DayType.DENOMINATOR;
 import static org.ssutt.android.activity.schedule_activity.tabs.DayType.FULL;
 import static org.ssutt.android.activity.schedule_activity.tabs.DayType.NUMERATOR;
@@ -96,29 +98,21 @@ public abstract class AbstractTab extends Fragment {
                 android.R.color.holo_green_light,
                 android.R.color.holo_orange_light,
                 android.R.color.holo_red_light);
-
-        //refreshSchedule(department, group);
         return view;
     }
 
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        refreshSchedule(department, group);
-    }
-
-    private void refreshSchedule(String department, String group) {
+    public void refreshSchedule(String department, String group) {
         if (isInternetAvailable(context)) {
             DayType dayType;
 
             SharedPreferences preferences = context.getSharedPreferences("pref", Context.MODE_PRIVATE);
-            System.out.println(preferences.getBoolean("btnNumerator", false));
-
             if (preferences.getBoolean("btnNumerator", false)) {
                 dayType = NUMERATOR;
             } else {
                 dayType = DENOMINATOR;
             }
 
+            System.out.println("REFRESHING " + dayType.name());
             ScheduleTask scheduleTask = new ScheduleTask(dayType);
             scheduleTask.execute(ApiRequests.getSchedule(department, group));
         } else {
@@ -205,6 +199,7 @@ public abstract class AbstractTab extends Fragment {
             }
 
             ScheduleListAdapter scheduleListAdapter = new ScheduleListAdapter(context);
+
             lessonBySubject = new HashMap<Subject, Integer>();
             if (scheduleByDay.get(getDayOfWeek()) == null) {
                 scheduleListAdapter.addSectionHeaderItem("Пар нет!");
@@ -218,13 +213,11 @@ public abstract class AbstractTab extends Fragment {
                         if (parity == dayType.ordinal() || parity == FULL.ordinal()) {
                             if(!isTimeAdded) {
                                 String time = times[lesson.getSequence() - 1];
-                                System.out.println("TIME: " + time + " SUBJECT: " + subject);
                                 scheduleListAdapter.addSectionHeaderItem(time);
                                 isTimeAdded = true;
                             }
 
                             scheduleListAdapter.addItem(subject);
-                            System.out.println("SUBJECT : " + subject);
                             lessonBySubject.put(subject, i);
                         }
                     }

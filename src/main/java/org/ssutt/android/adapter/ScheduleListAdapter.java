@@ -39,9 +39,12 @@ public class ScheduleListAdapter extends BaseAdapter {
 
     public void addSectionHeaderItem(final String item) {
         data.add(item);
-        System.out.println("ADDING TIME -----------------> " + item);
         sectionHeader.add(data.size() - 1);
         notifyDataSetChanged();
+    }
+
+    public void clear() {
+        data = new ArrayList();
     }
 
     @Override

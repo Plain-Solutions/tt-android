@@ -22,6 +22,7 @@ import org.ssutt.android.activity.schedule_activity.tabs.TabTuesday;
 import org.ssutt.android.activity.schedule_activity.tabs.TabWednesday;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import info.hoang8f.android.segmented.SegmentedGroup;
@@ -29,6 +30,8 @@ import info.hoang8f.android.segmented.SegmentedGroup;
 public class ScheduleActivity extends FragmentActivity {
     private static final String DEPARTMENT = "department";
     private static final String GROUP = "group";
+    private String department;
+    private String group;
 
     private PagerAdapter pagerAdapter;
     private ViewPager pager;
@@ -41,8 +44,8 @@ public class ScheduleActivity extends FragmentActivity {
     }
 
     private void initialisePaging() {
-        final String department = getIntent().getStringExtra(DEPARTMENT);
-        final String group = getIntent().getStringExtra(GROUP);
+        department = getIntent().getStringExtra(DEPARTMENT);
+        group = getIntent().getStringExtra(GROUP);
 
         List<Fragment> fragments = new ArrayList<Fragment>();
         fragments.add(new TabMonday());
@@ -57,7 +60,7 @@ public class ScheduleActivity extends FragmentActivity {
         pager.setAdapter(this.pagerAdapter);
         pager.setCurrentItem(Integer.MAX_VALUE / 2);
 
-        Spinner daysSpinner = (Spinner) findViewById(R.id.daysSpinner);
+        final Spinner daysSpinner = (Spinner) findViewById(R.id.daysSpinner);
         ArrayAdapter adapter = ArrayAdapter.createFromResource(this, R.array.days_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         daysSpinner.setAdapter(adapter);
@@ -73,6 +76,12 @@ public class ScheduleActivity extends FragmentActivity {
             }
         });
 
+        Calendar calendar = Calendar.getInstance();
+        int day = calendar.get(Calendar.DAY_OF_WEEK) - 2;
+        if(day < 0) {
+            day = 0;
+        }
+        daysSpinner.setSelection(day);
 
         final SegmentedGroup segmentedGroup = (SegmentedGroup) findViewById(R.id.segmentGroup);
         segmentedGroup.check(R.id.btnNumerator);
@@ -93,16 +102,29 @@ public class ScheduleActivity extends FragmentActivity {
                 }
 
                 AbstractTab item = (AbstractTab) pagerAdapter.getCurrentFragment();
-                System.out.println(department + " " + group + " " + dayType.name() + " " + getApplicationContext());
                 item.refreshSchedule(getApplicationContext(), dayType, department, group);
 
                 SharedPreferences preferences = getSharedPreferences("pref", MODE_PRIVATE);
                 SharedPreferences.Editor editor = preferences.edit();
-
                 editor.putBoolean("btnNumerator", checkedId == R.id.btnNumerator);
                 editor.apply();
+            }
+        });
 
-                System.out.println("UPDATED!");
+        pager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrollStateChanged(int state) {
+            }
+
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                AbstractTab tab = (AbstractTab) pagerAdapter.getItem(position);
+                tab.refreshSchedule(department, group);
+                daysSpinner.setSelection(position, true);
             }
         });
     }
