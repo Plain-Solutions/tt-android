@@ -1,7 +1,6 @@
 package org.ssutt.android.adapter;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,23 +18,29 @@ public class ScheduleListAdapter extends BaseAdapter {
     public static final int TYPE_ITEM = 0;
     public static final int TYPE_SEPARATOR = 1;
 
-    private List mData = new ArrayList();
+    private Context context;
+    private LayoutInflater inflater;
     private TreeSet<Integer> sectionHeader = new TreeSet<Integer>();
-
-    private LayoutInflater mInflater;
+    private List data = new ArrayList();
 
     public ScheduleListAdapter(Context context) {
-        mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        this.context = context;
+        inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    }
+
+    public Subject getItemFromData(int position) {
+        return (Subject) data.get(position);
     }
 
     public void addItem(Subject item) {
-        mData.add(item);
+        data.add(item);
         notifyDataSetChanged();
     }
 
     public void addSectionHeaderItem(final String item) {
-        mData.add(item);
-        sectionHeader.add(mData.size() - 1);
+        data.add(item);
+        System.out.println("ADDING TIME -----------------> " + item);
+        sectionHeader.add(data.size() - 1);
         notifyDataSetChanged();
     }
 
@@ -51,12 +56,12 @@ public class ScheduleListAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        return mData.size();
+        return data.size();
     }
 
     @Override
     public String getItem(int position) {
-        return mData.get(position).toString();
+        return data.get(position).toString();
     }
 
     @Override
@@ -65,39 +70,55 @@ public class ScheduleListAdapter extends BaseAdapter {
     }
 
     public View getView(int position, View convertView, ViewGroup parent) {
-        int rowType = getItemViewType(position);
+        switch (getItemViewType(position)) {
+            case TYPE_ITEM:
+                if(convertView == null) {
+                    convertView = inflater.inflate(R.layout.schedule_view_list_item, null);
+                }
 
-        if (convertView == null) {
-            switch (rowType) {
-                case TYPE_ITEM:
-                    convertView = mInflater.inflate(R.layout.schedule_view_list_item, null);
+                TextView subjectTextView = (TextView) convertView.findViewById(R.id.subjectTextView);
+                TextView locationTextView = (TextView) convertView.findViewById(R.id.locationTextView);
+                TextView subjectTypeTextView = (TextView) convertView.findViewById(R.id.subjectTypeTextView);
+                View lectureTypeView = convertView.findViewById(R.id.lectureTypeView);
 
-                    TextView subjectTextView = (TextView) convertView.findViewById(R.id.subjectTextView);
-                    TextView locationTextView = (TextView) convertView.findViewById(R.id.locationTextView);
-                    TextView subjectTypeTextView = (TextView) convertView.findViewById(R.id.subjectTypeTextView);
-                    View lectureTypeView = convertView.findViewById(R.id.lectureTypeView);
+                Subject subject = (Subject) data.get(position);
+                subjectTextView.setText(subject.getName());
+                locationTextView.setText(subject.getSubgroup().size() == 1 ? subject.getSubgroup().get(0).getLocation() : context.getString(R.string.multiplyValue));
 
-                    Subject subject = (Subject) mData.get(position);
-                    subjectTextView.setText(subject.getName());
-                    locationTextView.setText(subject.getSubgroup().size() == 1 ? subject.getSubgroup().get(0).getLocation() : "Multiply value");
-                    subjectTypeTextView.setText(subject.getActivity());
+                String activity = subject.getActivity();
+                String subjectTypeText;
+                int lectureTypeColor;
+                int backgroundColor;
 
-                    if (subject.getActivity().equals("lecture")) {
-                        lectureTypeView.setBackgroundColor(Color.parseColor("#ff5e3a"));
-                    } else {
-                        lectureTypeView.setBackgroundColor(Color.parseColor("#4cd964"));
-                    }
+                if (activity.equals("practice")) {
+                    subjectTypeText = context.getString(R.string.practice);
+                    lectureTypeColor = context.getResources().getColor(R.color.green);
+                    backgroundColor = R.drawable.background_green;
+                } else if (activity.equals("lecture")) {
+                    subjectTypeText = context.getString(R.string.lecture);
+                    lectureTypeColor = context.getResources().getColor(R.color.red);
+                    backgroundColor = R.drawable.background_red;
+                } else {
+                    subjectTypeText = context.getString(R.string.lab);
+                    lectureTypeColor = context.getResources().getColor(R.color.blue);
+                    backgroundColor = R.drawable.background_blue;
+                }
 
-                    break;
+                subjectTypeTextView.setText(subjectTypeText);
+                lectureTypeView.setBackgroundColor(lectureTypeColor);
+                subjectTypeTextView.setBackgroundResource(backgroundColor);
+                break;
 
-                case TYPE_SEPARATOR:
-                    convertView = mInflater.inflate(R.layout.schedule_view_list_header, null);
-                    TextView timeTextView = (TextView) convertView.findViewById(R.id.textView);
+            case TYPE_SEPARATOR:
+                if(convertView == null) {
+                    convertView = inflater.inflate(R.layout.schedule_view_list_header, null);
+                }
 
-                    String time = (String) mData.get(position);
-                    timeTextView.setText(time);
-                    break;
-            }
+                TextView timeTextView = (TextView) convertView.findViewById(R.id.textView);
+
+                String time = (String) data.get(position);
+                timeTextView.setText(time);
+                break;
         }
 
         return convertView;

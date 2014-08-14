@@ -38,26 +38,30 @@
             <LinearLayout
                 android:orientation="horizontal"
                 android:layout_width="fill_parent"
-                android:layout_height="fill_parent">
+                android:layout_height="match_parent">
 
                 <TextView
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:textColor="@android:color/black"
-                    android:text="12 корпус, ауд.312"
-                    android:id="@+id/locationTextView"
-                    android:gravity="center|left"
-                    android:layout_marginLeft="10dp"
-                    android:layout_weight="1" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:textColor="@android:color/black"
                     android:text="Лекция"
                     android:id="@+id/subjectTypeTextView"
-                    android:gravity="center|right"
+                    android:gravity="left"
+                    android:layout_gravity="center"
+                    android:layout_marginLeft="10dp"
+                    android:background="@drawable/background_green" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@android:color/black"
+                    android:text="12 корпус, ауд.312"
+                    android:id="@+id/locationTextView"
+                    android:gravity="right"
+                    android:layout_weight="1"
+                    android:layout_gravity="center"
                     android:layout_marginRight="15dp" />
+
             </LinearLayout>
         </LinearLayout>
 

@@ -26,7 +26,7 @@ import static org.ssutt.android.api.ApiConnector.*;
 import static org.ssutt.android.api.ApiConnector.errorToast;
 
 public class DepartmentActivity extends Activity {
-    private static final String DEPARTMENT = "department";;
+    private static final String DEPARTMENT = "department";
 
     private ListView departmentListView;
     private SwipeRefreshLayout swipeLayout;

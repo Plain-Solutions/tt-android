@@ -2,6 +2,7 @@ package org.ssutt.android.activity.schedule_activity.tabs;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -17,20 +18,25 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
 import org.ssutt.android.R;
+import org.ssutt.android.activity.SubjectDetailsActivity;
 import org.ssutt.android.adapter.ScheduleListAdapter;
 import org.ssutt.android.api.ApiConnector;
 import org.ssutt.android.api.ApiRequests;
 import org.ssutt.android.deserializer.LessonDeserializer;
 import org.ssutt.android.domain.Lesson.Lesson;
+import org.ssutt.android.domain.Lesson.Subgroup;
 import org.ssutt.android.domain.Lesson.Subject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
+import static org.ssutt.android.activity.schedule_activity.tabs.DayType.DENOMINATOR;
+import static org.ssutt.android.activity.schedule_activity.tabs.DayType.FULL;
+import static org.ssutt.android.activity.schedule_activity.tabs.DayType.NUMERATOR;
 import static org.ssutt.android.adapter.ScheduleListAdapter.TYPE_ITEM;
-import static org.ssutt.android.adapter.ScheduleListAdapter.TYPE_SEPARATOR;
 import static org.ssutt.android.api.ApiConnector.errorToast;
 import static org.ssutt.android.api.ApiConnector.isInternetAvailable;
 
@@ -38,7 +44,12 @@ public abstract class AbstractTab extends Fragment {
     private static final String[] times = {"08:20 - 09:50", "10:00 - 11:35", "12:05 - 13:40", "13:50 - 15:25", "15:35 - 17:10", "17:20 - 18:40", "18:45 - 20:05", "20:10 - 21:30"};
     private static final String DEPARTMENT = "department";
     private static final String GROUP = "group";
+    private static final String SUBJECT_DETAILS = "subject_details";
+    private static String department;
+    private static String group;
 
+    private Map<Integer, List<Lesson>> scheduleByDay;
+    private Map<Subject, Integer> lessonBySubject;
     private ListView scheduleListView;
     private SwipeRefreshLayout swipeLayout;
     private Context context;
@@ -50,26 +61,25 @@ public abstract class AbstractTab extends Fragment {
             return null;
         }
 
-        View view = inflater.inflate(R.layout.schedule_view_list, container, false);
         context = getActivity().getApplicationContext();
+        View view = inflater.inflate(R.layout.schedule_view_list, container, false);
         scheduleListView = (ListView) view.findViewById(R.id.scheduleListView);
 
-        Intent intent = getActivity().getIntent();
-        final String department = intent.getStringExtra(DEPARTMENT);
-        final String group = intent.getStringExtra(GROUP);
+        Intent intentGetData = getActivity().getIntent();
+        department = intentGetData.getStringExtra(DEPARTMENT);
+        group = intentGetData.getStringExtra(GROUP);
 
         scheduleListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                System.out.println(parent.getAdapter().getItem(position));
+                if (parent.getAdapter().getItemViewType(position) == TYPE_ITEM) {
+                    Intent intent = new Intent(context, SubjectDetailsActivity.class);
 
-                switch (parent.getAdapter().getItemViewType(position)) {
-                    case TYPE_ITEM:
-                        System.out.println("subject");
-                        break;
-                    case TYPE_SEPARATOR:
-                        System.out.println("time");
-                        break;
+                    ScheduleListAdapter adapter = (ScheduleListAdapter) parent.getAdapter();
+                    ArrayList<String> data = getSubjectDetails(adapter.getItemFromData(position));
+                    intent.putStringArrayListExtra(SUBJECT_DETAILS, data);
+
+                    startActivity(intent);
                 }
             }
         });
@@ -78,13 +88,7 @@ public abstract class AbstractTab extends Fragment {
         swipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                if (isInternetAvailable(context)) {
-                    ScheduleTask scheduleTask = new ScheduleTask();
-                    scheduleTask.execute(ApiRequests.getSchedule(department, group));
-                } else {
-                    errorToast(context);
-                    swipeLayout.setRefreshing(false);
-                }
+                refreshSchedule(department, group);
             }
         });
 
@@ -93,17 +97,87 @@ public abstract class AbstractTab extends Fragment {
                 android.R.color.holo_orange_light,
                 android.R.color.holo_red_light);
 
+        //refreshSchedule(department, group);
+        return view;
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        refreshSchedule(department, group);
+    }
+
+    private void refreshSchedule(String department, String group) {
         if (isInternetAvailable(context)) {
-            ScheduleTask scheduleTask = new ScheduleTask();
+            DayType dayType;
+
+            SharedPreferences preferences = context.getSharedPreferences("pref", Context.MODE_PRIVATE);
+            System.out.println(preferences.getBoolean("btnNumerator", false));
+
+            if (preferences.getBoolean("btnNumerator", false)) {
+                dayType = NUMERATOR;
+            } else {
+                dayType = DENOMINATOR;
+            }
+
+            ScheduleTask scheduleTask = new ScheduleTask(dayType);
+            scheduleTask.execute(ApiRequests.getSchedule(department, group));
+        } else {
+            errorToast(context);
+            swipeLayout.setRefreshing(false);
+        }
+    }
+
+    public void refreshSchedule(Context context, DayType dayType, String department, String group) {
+        if (isInternetAvailable(context)) {
+            ScheduleTask scheduleTask = new ScheduleTask(dayType);
             scheduleTask.execute(ApiRequests.getSchedule(department, group));
         } else {
             errorToast(context);
         }
+    }
 
-        return view;
+    private ArrayList<String> getSubjectDetails(Subject subject) {
+        ArrayList<String> subjectDetails = new ArrayList<String>();
+        subjectDetails.add(subject.getName());
+
+        String activity = subject.getActivity();
+        subjectDetails.add(
+                activity.equals("lecture") ? context.getString(R.string.lecture) :
+                activity.equals("practice") ? context.getString(R.string.practice) :
+                context.getString(R.string.lab)
+        );
+
+        Lesson lesson = scheduleByDay.get(getDayOfWeek()).get(lessonBySubject.get(subject));
+        subjectDetails.add(times[lesson.getSequence() - 1]);
+
+        int parity = subject.getParity();
+        subjectDetails.add(
+                parity == 0 ? context.getString(R.string.numerator) :
+                parity == 1 ? context.getString(R.string.denominator) :
+                context.getString(R.string.both)
+        );
+
+        for (Subgroup subgroup : subject.getSubgroup()) {
+            StringBuilder subgroupDetails = new StringBuilder();
+            subgroupDetails
+                    .append(subgroup.getTeacher())
+                    .append("\n")
+                    .append(subgroup.getLocation())
+                    .append("\n")
+                    .append(subgroup.getSubgroup());
+            subjectDetails.add(subgroupDetails.toString());
+        }
+
+        return subjectDetails;
     }
 
     private class ScheduleTask extends ApiConnector {
+        DayType dayType;
+
+        public ScheduleTask(DayType dayType) {
+            this.dayType = dayType;
+        }
+
         @Override
         protected void onPreExecute() {
             swipeLayout.setRefreshing(true);
@@ -118,7 +192,7 @@ public abstract class AbstractTab extends Fragment {
 
             Lesson[] lessons = gsonBuilder.create().fromJson(asJsonArray, Lesson[].class);
 
-            Map<Integer, List<Lesson>> scheduleByDay = new HashMap<Integer, List<Lesson>>();
+            scheduleByDay = new TreeMap<Integer, List<Lesson>>();
             for (Lesson lesson : lessons) {
                 int day = lesson.getDay();
                 if (!scheduleByDay.containsKey(day)) {
@@ -131,17 +205,30 @@ public abstract class AbstractTab extends Fragment {
             }
 
             ScheduleListAdapter scheduleListAdapter = new ScheduleListAdapter(context);
-
+            lessonBySubject = new HashMap<Subject, Integer>();
             if (scheduleByDay.get(getDayOfWeek()) == null) {
                 scheduleListAdapter.addSectionHeaderItem("Пар нет!");
             } else {
+                int i = 0;
                 for (Lesson lesson : scheduleByDay.get(getDayOfWeek())) {
-                    String time = times[lesson.getSequence() - 1];
-                    scheduleListAdapter.addSectionHeaderItem(time);
+                    boolean isTimeAdded = false;
 
                     for (Subject subject : lesson.getSubject()) {
-                        scheduleListAdapter.addItem(subject);
+                        int parity = subject.getParity();
+                        if (parity == dayType.ordinal() || parity == FULL.ordinal()) {
+                            if(!isTimeAdded) {
+                                String time = times[lesson.getSequence() - 1];
+                                System.out.println("TIME: " + time + " SUBJECT: " + subject);
+                                scheduleListAdapter.addSectionHeaderItem(time);
+                                isTimeAdded = true;
+                            }
+
+                            scheduleListAdapter.addItem(subject);
+                            System.out.println("SUBJECT : " + subject);
+                            lessonBySubject.put(subject, i);
+                        }
                     }
+                    ++i;
                 }
             }
 

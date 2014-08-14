@@ -19,6 +19,7 @@
         </activity>
         <activity android:name=".activity.GroupActivity" />
         <activity android:name=".activity.schedule_activity.ScheduleActivity" />
+        <activity android:name=".activity.SubjectDetailsActivity" />
     </application>
 
 </manifest>

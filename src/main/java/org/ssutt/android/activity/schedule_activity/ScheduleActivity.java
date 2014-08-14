@@ -1,15 +1,19 @@
 package org.ssutt.android.activity.schedule_activity;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 
 import org.ssutt.android.R;
 import org.ssutt.android.activity.schedule_activity.tabs.AbstractTab;
+import org.ssutt.android.activity.schedule_activity.tabs.DayType;
 import org.ssutt.android.activity.schedule_activity.tabs.TabFriday;
 import org.ssutt.android.activity.schedule_activity.tabs.TabMonday;
 import org.ssutt.android.activity.schedule_activity.tabs.TabSaturday;
@@ -18,13 +22,15 @@ import org.ssutt.android.activity.schedule_activity.tabs.TabTuesday;
 import org.ssutt.android.activity.schedule_activity.tabs.TabWednesday;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import info.hoang8f.android.segmented.SegmentedGroup;
 
-public class ScheduleActivity extends FragmentActivity implements ViewPager.OnPageChangeListener {
-    private PagerAdapter mPagerAdapter;
+public class ScheduleActivity extends FragmentActivity {
+    private static final String DEPARTMENT = "department";
+    private static final String GROUP = "group";
+
+    private PagerAdapter pagerAdapter;
     private ViewPager pager;
 
     @Override
@@ -35,62 +41,69 @@ public class ScheduleActivity extends FragmentActivity implements ViewPager.OnPa
     }
 
     private void initialisePaging() {
+        final String department = getIntent().getStringExtra(DEPARTMENT);
+        final String group = getIntent().getStringExtra(GROUP);
+
         List<Fragment> fragments = new ArrayList<Fragment>();
-        List<Class<? extends AbstractTab>> tabClasses = Arrays.asList(
-                TabMonday.class,
-                TabTuesday.class,
-                TabWednesday.class,
-                TabThursday.class,
-                TabFriday.class,
-                TabSaturday.class);
+        fragments.add(new TabMonday());
+        fragments.add(new TabTuesday());
+        fragments.add(new TabWednesday());
+        fragments.add(new TabThursday());
+        fragments.add(new TabFriday());
+        fragments.add(new TabSaturday());
 
-        for (Class cur : tabClasses) {
-            fragments.add(Fragment.instantiate(this, cur.getName()));
-        }
-
-        this.mPagerAdapter = new PagerAdapter(super.getSupportFragmentManager(), fragments);
+        this.pagerAdapter = new PagerAdapter(super.getSupportFragmentManager(), fragments);
         pager = (ViewPager) super.findViewById(R.id.viewpager);
-        pager.setAdapter(this.mPagerAdapter);
-        pager.setOnPageChangeListener(this);
-        pager.setCurrentItem(0, false);
+        pager.setAdapter(this.pagerAdapter);
+        pager.setCurrentItem(Integer.MAX_VALUE / 2);
 
         Spinner daysSpinner = (Spinner) findViewById(R.id.daysSpinner);
         ArrayAdapter adapter = ArrayAdapter.createFromResource(this, R.array.days_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         daysSpinner.setAdapter(adapter);
-
-        SegmentedGroup evenOddSegment = (SegmentedGroup) findViewById(R.id.evenOddSegment);
-        evenOddSegment.check(R.id.btnEven);
-
-        evenOddSegment.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+        daysSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                System.out.println(R.id.btnEven == checkedId ? "even" : "odd");
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                pager.setCurrentItem(position, false);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
             }
         });
-    }
 
-    @Override
-    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 
-    }
+        final SegmentedGroup segmentedGroup = (SegmentedGroup) findViewById(R.id.segmentGroup);
+        segmentedGroup.check(R.id.btnNumerator);
+        SharedPreferences preferences = getSharedPreferences("pref", MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
 
-    @Override
-    public void onPageSelected(int position) {
+        editor.putBoolean("btnNumerator", true);
+        editor.apply();
 
-    }
+        segmentedGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup rg, int checkedId) {
+                DayType dayType;
+                if (checkedId == R.id.btnNumerator) {
+                    dayType = DayType.NUMERATOR;
+                } else {
+                    dayType = DayType.DENOMINATOR;
+                }
 
-    @Override
-    public void onPageScrollStateChanged(int state) {
-        /*if (state == ViewPager.SCROLL_STATE_IDLE) {
-            int current = pager.getCurrentItem();
-            int lastReal = pager.getAdapter().getCount() - 2;
+                AbstractTab item = (AbstractTab) pagerAdapter.getCurrentFragment();
+                System.out.println(department + " " + group + " " + dayType.name() + " " + getApplicationContext());
+                item.refreshSchedule(getApplicationContext(), dayType, department, group);
 
-            if (current == 0) {
-                pager.setCurrentItem(lastReal, false);
-            } else if (current > lastReal) {
-                pager.setCurrentItem(1, false);
+                SharedPreferences preferences = getSharedPreferences("pref", MODE_PRIVATE);
+                SharedPreferences.Editor editor = preferences.edit();
+
+                editor.putBoolean("btnNumerator", checkedId == R.id.btnNumerator);
+                editor.apply();
+
+                System.out.println("UPDATED!");
             }
-        }*/
+        });
     }
 }

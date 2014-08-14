@@ -1,3 +1,5 @@
 /build
 proguard-rules.pro
 ssutt-android-app.iml
+ssutt-android-app-debug.apk
+ssutt-android-app-release.apk
