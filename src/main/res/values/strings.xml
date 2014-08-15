@@ -18,6 +18,9 @@
 
     <string name="multiplyValue">Несколько подгрупп</string>
 
+    <string name="drawer_open">Open</string>
+    <string name="drawer_close">Close</string>
+
     <color name="red">#ff5e3a</color>
     <color name="green">#4cd964</color>
     <color name="blue">#66cdfc</color>

@@ -1,15 +1,21 @@
 package org.ssutt.android.activity.schedule_activity;
 
+import android.app.ActionBar;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
+import android.widget.ListView;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import org.ssutt.android.R;
 import org.ssutt.android.activity.schedule_activity.tabs.AbstractTab;
@@ -35,6 +41,9 @@ public class ScheduleActivity extends FragmentActivity {
 
     private PagerAdapter pagerAdapter;
     private ViewPager pager;
+    private String[] mPlanetTitles;
+    private DrawerLayout mDrawerLayout;
+    private ListView mDrawerList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,8 +53,25 @@ public class ScheduleActivity extends FragmentActivity {
     }
 
     private void initialisePaging() {
+        final View actionBarLayout = getLayoutInflater().inflate(R.layout.action_bar, null);
+        ImageButton btnShowMenu = (ImageButton) actionBarLayout.findViewById(R.id.imageButton);
+        final TextView settingsTextView = (TextView) actionBarLayout.findViewById(R.id.settingsTextView);
+        settingsTextView.setVisibility(View.GONE);
+
+        final ActionBar actionBar = getActionBar();
+        actionBar.setCustomView(actionBarLayout);
+        actionBar.setDisplayShowTitleEnabled(false);
+        actionBar.setDisplayShowCustomEnabled(true);
+        actionBar.setDisplayShowHomeEnabled(false);
+
         department = getIntent().getStringExtra(DEPARTMENT);
         group = getIntent().getStringExtra(GROUP);
+
+        Calendar calendar = Calendar.getInstance();
+        int day = calendar.get(Calendar.DAY_OF_WEEK) - 2;
+        if(day < 0) {
+            day = 0;
+        }
 
         List<Fragment> fragments = new ArrayList<Fragment>();
         fragments.add(new TabMonday());
@@ -58,29 +84,26 @@ public class ScheduleActivity extends FragmentActivity {
         this.pagerAdapter = new PagerAdapter(super.getSupportFragmentManager(), fragments);
         pager = (ViewPager) super.findViewById(R.id.viewpager);
         pager.setAdapter(this.pagerAdapter);
-        pager.setCurrentItem(Integer.MAX_VALUE / 2);
 
-        final Spinner daysSpinner = (Spinner) findViewById(R.id.daysSpinner);
-        ArrayAdapter adapter = ArrayAdapter.createFromResource(this, R.array.days_array, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        daysSpinner.setAdapter(adapter);
+
+        final String[] data = this.getResources().getStringArray(R.array.days_array);
+        ArrayAdapter<String> daysSpinnerAdapter = new ArrayAdapter<String>(this, R.layout.spinner_test, data);
+        daysSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        final Spinner daysSpinner = (Spinner) actionBarLayout.findViewById(R.id.daysSpinner);
+        daysSpinner.setAdapter(daysSpinnerAdapter);
         daysSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
                 pager.setCurrentItem(position, false);
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {
+            public void onNothingSelected(AdapterView<?> adapterView) {
 
             }
         });
 
-        Calendar calendar = Calendar.getInstance();
-        int day = calendar.get(Calendar.DAY_OF_WEEK) - 2;
-        if(day < 0) {
-            day = 0;
-        }
         daysSpinner.setSelection(day);
 
         final SegmentedGroup segmentedGroup = (SegmentedGroup) findViewById(R.id.segmentGroup);
@@ -125,6 +148,51 @@ public class ScheduleActivity extends FragmentActivity {
                 AbstractTab tab = (AbstractTab) pagerAdapter.getItem(position);
                 tab.refreshSchedule(department, group);
                 daysSpinner.setSelection(position, true);
+            }
+        });
+
+        mPlanetTitles = getResources().getStringArray(R.array.days_array);
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+
+        mDrawerList = (ListView) findViewById(R.id.left_drawer);
+        mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.list_item, mPlanetTitles));
+        mDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+                System.out.println(mPlanetTitles[position]);
+            }
+        });
+
+        mDrawerLayout.setDrawerListener(new ActionBarDrawerToggle(this, mDrawerLayout, R.drawable.ic_launcher, R.string.drawer_open, R.string.drawer_close) {
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                daysSpinner.setVisibility(View.GONE);
+                settingsTextView.setVisibility(View.VISIBLE);
+                super.onDrawerOpened(drawerView);
+            }
+
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                daysSpinner.setVisibility(View.VISIBLE);
+                settingsTextView.setVisibility(View.GONE);
+                super.onDrawerClosed(drawerView);
+            }
+        });
+
+        btnShowMenu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!mDrawerLayout.isDrawerOpen(mDrawerList)) {
+                    mDrawerLayout.openDrawer(mDrawerList);
+                    daysSpinner.setVisibility(View.GONE);
+                    settingsTextView.setVisibility(View.VISIBLE);
+                } else {
+                    mDrawerLayout.closeDrawer(mDrawerList);
+                    daysSpinner.setVisibility(View.VISIBLE);
+                    settingsTextView.setVisibility(View.GONE);
+                }
+
+                actionBar.setCustomView(actionBarLayout);
             }
         });
     }
