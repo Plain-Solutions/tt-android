@@ -1,5 +1,6 @@
 package org.ssutt.android.activity;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -42,6 +43,10 @@ public class GroupActivity extends Activity {
         groupListView = (ListView) findViewById(R.id.groupListView);
         swipeLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_container);
         context = this;
+
+        ActionBar actionBar = getActionBar();
+        actionBar.setDisplayShowHomeEnabled(false);
+        actionBar.setTitle(getString(R.string.chooseGroup));
 
         final Department department = (Department) getIntent().getSerializableExtra(DEPARTMENT);
         groupListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {

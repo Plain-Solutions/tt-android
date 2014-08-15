@@ -1,5 +1,6 @@
 package org.ssutt.android.activity;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -39,6 +40,10 @@ public class DepartmentActivity extends Activity {
         setContentView(R.layout.department_view);
         departmentListView = (ListView) findViewById(R.id.departmentListView);
         context = this;
+
+        ActionBar actionBar = getActionBar();
+        actionBar.setDisplayShowHomeEnabled(false);
+        actionBar.setTitle(getString(R.string.chooseDepartment));
 
         departmentListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override

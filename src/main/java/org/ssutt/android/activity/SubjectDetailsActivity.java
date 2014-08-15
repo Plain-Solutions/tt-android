@@ -1,5 +1,6 @@
 package org.ssutt.android.activity;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -18,6 +19,10 @@ public class SubjectDetailsActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.subject_details_view);
+
+        ActionBar actionBar = getActionBar();
+        actionBar.setDisplayShowHomeEnabled(false);
+        actionBar.setTitle(getString(R.string.details));
 
         Intent intent = getIntent();
         ArrayList<String> subjectDetails = intent.getStringArrayListExtra(SUBJECT_DETAILS);
