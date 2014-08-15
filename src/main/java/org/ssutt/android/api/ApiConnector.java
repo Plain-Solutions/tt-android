@@ -18,11 +18,19 @@ import java.io.InputStreamReader;
 
 public abstract class ApiConnector extends AsyncTask<String, Integer, String> {
     private static final String errorMessage = "При загрузке данных произошла ошибка. Проверьте Ваше подключение к сети.";
+    private static final String cacheMessage = "Данные загружены из локального хранилища.";
+    private static final String cacheNoFoundMessage = "Данные в локальном хранилище не найдены.";
+    private String url;
+
+    public String getUrl() {
+        return url;
+    }
 
     @Override
     protected String doInBackground(String... params) {
+        url = params[0];
         final AndroidHttpClient client = AndroidHttpClient.newInstance("Android");
-        final HttpGet getRequest = new HttpGet(params[0]);
+        final HttpGet getRequest = new HttpGet(url);
 
         try {
             HttpResponse response = client.execute(getRequest);
@@ -68,6 +76,14 @@ public abstract class ApiConnector extends AsyncTask<String, Integer, String> {
     }
 
     public static void errorToast(Context context) {
-        Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show();
+        Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show();
+    }
+
+    public static void cacheToast(Context context) {
+        Toast.makeText(context, cacheMessage, Toast.LENGTH_SHORT).show();
+    }
+
+    public static void cacheNoFoundToast(Context context) {
+        Toast.makeText(context, cacheNoFoundMessage, Toast.LENGTH_SHORT).show();
     }
 }

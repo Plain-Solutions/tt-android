@@ -4,6 +4,7 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.View;
@@ -19,13 +20,17 @@ import org.ssutt.android.R;
 import org.ssutt.android.activity.schedule_activity.ScheduleActivity;
 import org.ssutt.android.adapter.GroupListAdapter;
 import org.ssutt.android.api.ApiConnector;
+import org.ssutt.android.api.ApiRequests;
 import org.ssutt.android.api.GroupMode;
 import org.ssutt.android.deserializer.GroupDeserializer;
 import org.ssutt.android.domain.Department;
 import org.ssutt.android.domain.Group;
 
-import static org.ssutt.android.api.ApiConnector.*;
-import static org.ssutt.android.api.ApiRequests.*;
+import static org.ssutt.android.api.ApiConnector.cacheNoFoundToast;
+import static org.ssutt.android.api.ApiConnector.cacheToast;
+import static org.ssutt.android.api.ApiConnector.errorToast;
+import static org.ssutt.android.api.ApiConnector.isInternetAvailable;
+import static org.ssutt.android.api.ApiRequests.getGroups;
 
 public class GroupActivity extends Activity {
     private static final String DEPARTMENT = "department";
@@ -59,12 +64,13 @@ public class GroupActivity extends Activity {
             }
         });
 
+        final String groupsRequest = getGroups(department.getTag(), GroupMode.ONLY_FILLED);
         swipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
                 if (isInternetAvailable(context)) {
                     GroupTask scheduleTask = new GroupTask();
-                    scheduleTask.execute(getGroups(department.getTag(), GroupMode.ONLY_FILLED));
+                    scheduleTask.execute(groupsRequest);
                 } else {
                     errorToast(context);
                     swipeLayout.setRefreshing(false);
@@ -79,9 +85,50 @@ public class GroupActivity extends Activity {
 
         if (isInternetAvailable(context)) {
             GroupTask scheduleTask = new GroupTask();
-            scheduleTask.execute(getGroups(department.getTag(), GroupMode.ONLY_FILLED));
+            scheduleTask.execute(groupsRequest);
         } else {
             errorToast(context);
+
+            SharedPreferences sharedPreferences = getSharedPreferences("cacheGroups", MODE_PRIVATE);
+            String json = sharedPreferences.getString(groupsRequest, "isEmpty");
+            if(!json.equals("isEmpty")) {
+                updateUI(json);
+                cacheToast(context);
+            } else {
+                cacheNoFoundToast(context);
+            }
+        }
+    }
+
+    private void updateUI(String json) {
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.registerTypeAdapter(Group.class, new GroupDeserializer());
+        JsonElement jsonElement = new JsonParser().parse(json);
+        JsonArray asJsonArray = jsonElement.getAsJsonArray();
+
+        Group[] groups = gsonBuilder.create().fromJson(asJsonArray, Group[].class);
+        processGroups(groups);
+
+        GroupListAdapter groupAdapter = new GroupListAdapter(context, groupNames);
+        groupListView.setAdapter(groupAdapter);
+    }
+
+    private class GroupTask extends ApiConnector {
+
+        @Override
+        protected void onPreExecute() {
+            swipeLayout.setRefreshing(true);
+        }
+
+        @Override
+        protected void onPostExecute(String json) {
+            SharedPreferences sharedPreferences = getSharedPreferences("cacheGroups", MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString(getUrl(), json);
+            editor.commit();
+
+            updateUI(json);
+            swipeLayout.setRefreshing(false);
         }
     }
 
@@ -90,28 +137,6 @@ public class GroupActivity extends Activity {
         int i = 0;
         for (Group group : groups) {
             groupNames[i++] = group.getName();
-        }
-    }
-
-    private class GroupTask extends ApiConnector {
-        @Override
-        protected void onPreExecute() {
-            swipeLayout.setRefreshing(true);
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            GsonBuilder gsonBuilder = new GsonBuilder();
-            gsonBuilder.registerTypeAdapter(Group.class, new GroupDeserializer());
-            JsonElement jsonElement = new JsonParser().parse(s);
-            JsonArray asJsonArray = jsonElement.getAsJsonArray();
-
-            Group[] groups = gsonBuilder.create().fromJson(asJsonArray, Group[].class);
-            processGroups(groups);
-
-            GroupListAdapter groupAdapter = new GroupListAdapter(context, groupNames);
-            groupListView.setAdapter(groupAdapter);
-            swipeLayout.setRefreshing(false);
         }
     }
 }

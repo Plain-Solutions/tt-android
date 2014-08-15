@@ -20,10 +20,13 @@ import com.google.gson.JsonParser;
 
 import org.ssutt.android.R;
 import org.ssutt.android.activity.SubjectDetailsActivity;
+import org.ssutt.android.adapter.DepartmentListAdapter;
 import org.ssutt.android.adapter.ScheduleListAdapter;
 import org.ssutt.android.api.ApiConnector;
 import org.ssutt.android.api.ApiRequests;
+import org.ssutt.android.deserializer.DepartmentDeserializer;
 import org.ssutt.android.deserializer.LessonDeserializer;
+import org.ssutt.android.domain.Department;
 import org.ssutt.android.domain.Lesson.Lesson;
 import org.ssutt.android.domain.Lesson.Subgroup;
 import org.ssutt.android.domain.Lesson.Subject;
@@ -34,11 +37,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import static android.content.Context.*;
 import static android.support.v4.view.ViewPager.*;
 import static org.ssutt.android.activity.schedule_activity.tabs.DayType.DENOMINATOR;
 import static org.ssutt.android.activity.schedule_activity.tabs.DayType.FULL;
 import static org.ssutt.android.activity.schedule_activity.tabs.DayType.NUMERATOR;
 import static org.ssutt.android.adapter.ScheduleListAdapter.TYPE_ITEM;
+import static org.ssutt.android.api.ApiConnector.cacheNoFoundToast;
+import static org.ssutt.android.api.ApiConnector.cacheToast;
 import static org.ssutt.android.api.ApiConnector.errorToast;
 import static org.ssutt.android.api.ApiConnector.isInternetAvailable;
 
@@ -104,31 +110,50 @@ public abstract class AbstractTab extends Fragment {
     }
 
     public void refreshSchedule(String department, String group) {
+        DayType dayType;
+        SharedPreferences preferences = context.getSharedPreferences("pref", MODE_PRIVATE);
+        if (preferences.getBoolean("btnNumerator", false)) {
+            dayType = NUMERATOR;
+        } else {
+            dayType = DENOMINATOR;
+        }
+
+        String scheduleRequest = ApiRequests.getSchedule(department, group);
         if (isInternetAvailable(context)) {
-            DayType dayType;
-
-            SharedPreferences preferences = context.getSharedPreferences("pref", Context.MODE_PRIVATE);
-            if (preferences.getBoolean("btnNumerator", false)) {
-                dayType = NUMERATOR;
-            } else {
-                dayType = DENOMINATOR;
-            }
-
-            System.out.println("REFRESHING " + dayType.name());
             ScheduleTask scheduleTask = new ScheduleTask(dayType);
-            scheduleTask.execute(ApiRequests.getSchedule(department, group));
+            scheduleTask.execute(scheduleRequest);
         } else {
             errorToast(context);
+
+            SharedPreferences sharedPreferences = context.getSharedPreferences("cacheSchedule", MODE_PRIVATE);
+            String json = sharedPreferences.getString(scheduleRequest, "isEmpty");
+            if(!json.equals("isEmpty")) {
+                updateUI(dayType, json);
+                cacheToast(context);
+            } else {
+                cacheNoFoundToast(context);
+            }
+
             swipeLayout.setRefreshing(false);
         }
     }
 
     public void refreshSchedule(Context context, DayType dayType, String department, String group) {
+        String scheduleRequest = ApiRequests.getSchedule(department, group);
         if (isInternetAvailable(context)) {
             ScheduleTask scheduleTask = new ScheduleTask(dayType);
-            scheduleTask.execute(ApiRequests.getSchedule(department, group));
+            scheduleTask.execute(scheduleRequest);
         } else {
             errorToast(context);
+
+            SharedPreferences sharedPreferences = context.getSharedPreferences("cacheSchedule", MODE_PRIVATE);
+            String json = sharedPreferences.getString(scheduleRequest, "isEmpty");
+            if(!json.equals("isEmpty")) {
+                updateUI(dayType, json);
+                cacheToast(context);
+            } else {
+                cacheNoFoundToast(context);
+            }
         }
     }
 
@@ -167,6 +192,56 @@ public abstract class AbstractTab extends Fragment {
         return subjectDetails;
     }
 
+    private void updateUI(DayType dayType, String json) {
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.registerTypeAdapter(Lesson.class, new LessonDeserializer());
+        JsonElement jsonElement = new JsonParser().parse(json);
+        JsonArray asJsonArray = jsonElement.getAsJsonArray();
+
+        Lesson[] lessons = gsonBuilder.create().fromJson(asJsonArray, Lesson[].class);
+
+        scheduleByDay = new TreeMap<Integer, List<Lesson>>();
+        for (Lesson lesson : lessons) {
+            int day = lesson.getDay();
+            if (!scheduleByDay.containsKey(day)) {
+                List<Lesson> lessonList = new ArrayList<Lesson>();
+                lessonList.add(lesson);
+                scheduleByDay.put(day, lessonList);
+            } else {
+                scheduleByDay.get(day).add(lesson);
+            }
+        }
+
+        ScheduleListAdapter scheduleListAdapter = new ScheduleListAdapter(context);
+
+        lessonBySubject = new HashMap<Subject, Integer>();
+        if (scheduleByDay.get(getDayOfWeek()) == null) {
+            scheduleListAdapter.addSectionHeaderItem("Пар нет!");
+        } else {
+            int i = 0;
+            for (Lesson lesson : scheduleByDay.get(getDayOfWeek())) {
+                boolean isTimeAdded = false;
+
+                for (Subject subject : lesson.getSubject()) {
+                    int parity = subject.getParity();
+                    if (parity == dayType.ordinal() || parity == FULL.ordinal()) {
+                        if(!isTimeAdded) {
+                            String time = times[lesson.getSequence() - 1];
+                            scheduleListAdapter.addSectionHeaderItem(time);
+                            isTimeAdded = true;
+                        }
+
+                        scheduleListAdapter.addItem(subject);
+                        lessonBySubject.put(subject, i);
+                    }
+                }
+                ++i;
+            }
+        }
+
+        scheduleListView.setAdapter(scheduleListAdapter);
+    }
+
     private class ScheduleTask extends ApiConnector {
         DayType dayType;
 
@@ -180,54 +255,13 @@ public abstract class AbstractTab extends Fragment {
         }
 
         @Override
-        public void onPostExecute(String s) {
-            GsonBuilder gsonBuilder = new GsonBuilder();
-            gsonBuilder.registerTypeAdapter(Lesson.class, new LessonDeserializer());
-            JsonElement jsonElement = new JsonParser().parse(s);
-            JsonArray asJsonArray = jsonElement.getAsJsonArray();
+        public void onPostExecute(String json) {
+            SharedPreferences sharedPreferences = context.getSharedPreferences("cacheSchedule", MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString(getUrl(), json);
+            editor.commit();
 
-            Lesson[] lessons = gsonBuilder.create().fromJson(asJsonArray, Lesson[].class);
-
-            scheduleByDay = new TreeMap<Integer, List<Lesson>>();
-            for (Lesson lesson : lessons) {
-                int day = lesson.getDay();
-                if (!scheduleByDay.containsKey(day)) {
-                    List<Lesson> lessonList = new ArrayList<Lesson>();
-                    lessonList.add(lesson);
-                    scheduleByDay.put(day, lessonList);
-                } else {
-                    scheduleByDay.get(day).add(lesson);
-                }
-            }
-
-            ScheduleListAdapter scheduleListAdapter = new ScheduleListAdapter(context);
-
-            lessonBySubject = new HashMap<Subject, Integer>();
-            if (scheduleByDay.get(getDayOfWeek()) == null) {
-                scheduleListAdapter.addSectionHeaderItem("Пар нет!");
-            } else {
-                int i = 0;
-                for (Lesson lesson : scheduleByDay.get(getDayOfWeek())) {
-                    boolean isTimeAdded = false;
-
-                    for (Subject subject : lesson.getSubject()) {
-                        int parity = subject.getParity();
-                        if (parity == dayType.ordinal() || parity == FULL.ordinal()) {
-                            if(!isTimeAdded) {
-                                String time = times[lesson.getSequence() - 1];
-                                scheduleListAdapter.addSectionHeaderItem(time);
-                                isTimeAdded = true;
-                            }
-
-                            scheduleListAdapter.addItem(subject);
-                            lessonBySubject.put(subject, i);
-                        }
-                    }
-                    ++i;
-                }
-            }
-
-            scheduleListView.setAdapter(scheduleListAdapter);
+            updateUI(dayType, json);
             swipeLayout.setRefreshing(false);
         }
     }
