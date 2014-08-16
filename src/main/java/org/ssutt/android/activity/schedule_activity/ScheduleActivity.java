@@ -18,6 +18,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import org.ssutt.android.R;
+import org.ssutt.android.activity.DepartmentActivity;
 import org.ssutt.android.activity.schedule_activity.tabs.AbstractTab;
 import org.ssutt.android.activity.schedule_activity.tabs.DayType;
 import org.ssutt.android.activity.schedule_activity.tabs.TabFriday;
@@ -26,6 +27,8 @@ import org.ssutt.android.activity.schedule_activity.tabs.TabSaturday;
 import org.ssutt.android.activity.schedule_activity.tabs.TabThursday;
 import org.ssutt.android.activity.schedule_activity.tabs.TabTuesday;
 import org.ssutt.android.activity.schedule_activity.tabs.TabWednesday;
+import org.ssutt.android.adapter.ScheduleListAdapter;
+import org.ssutt.android.domain.Department;
 
 import java.util.ArrayList;
 import java.util.Calendar;

@@ -57,6 +57,13 @@ public class GroupActivity extends Activity {
         groupListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                SharedPreferences sharedPreferences = getSharedPreferences("pref", MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString("myDepartment", department.getTag());
+                editor.putString("myGroup", groupNames[position]);
+                editor.putBoolean("firstTime", false);
+                editor.commit();
+
                 Intent intent = new Intent(context, ScheduleActivity.class);
                 intent.putExtra(DEPARTMENT, department.getTag());
                 intent.putExtra(GROUP, groupNames[position]);

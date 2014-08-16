@@ -2,7 +2,9 @@ package org.ssutt.android.activity;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -18,6 +20,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
 import org.ssutt.android.R;
+import org.ssutt.android.activity.schedule_activity.ScheduleActivity;
 import org.ssutt.android.adapter.DepartmentListAdapter;
 import org.ssutt.android.api.ApiConnector;
 import org.ssutt.android.api.ApiRequests;
@@ -29,6 +32,7 @@ import static org.ssutt.android.api.ApiConnector.errorToast;
 
 public class DepartmentActivity extends Activity {
     private static final String DEPARTMENT = "department";
+    private static final String GROUP = "group";
 
     private ListView departmentListView;
     private SwipeRefreshLayout swipeLayout;
@@ -39,13 +43,33 @@ public class DepartmentActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.department_view);
-        departmentListView = (ListView) findViewById(R.id.departmentListView);
         context = this;
+
+        SharedPreferences sharedPreferences = getSharedPreferences("pref", MODE_PRIVATE);
+        if(sharedPreferences.getBoolean("firstTime", true)) {
+            new AlertDialog.Builder(this)
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setTitle("Добро пожаловать!")
+                    .setMessage("Выберите Ваш факультет и группу!")
+                    .setPositiveButton("Далее", null)
+                    .show();
+        } else {
+            String department = sharedPreferences.getString("myDepartment", "");
+            String group = sharedPreferences.getString("myGroup", "");
+
+            Intent intent = new Intent(context, ScheduleActivity.class);
+            intent.putExtra(DEPARTMENT, department);
+            intent.putExtra(GROUP, group);
+            startActivity(intent);
+            DepartmentActivity.this.finish();
+        }
+
 
         ActionBar actionBar = getActionBar();
         actionBar.setDisplayShowHomeEnabled(false);
         actionBar.setTitle(getString(R.string.chooseDepartment));
 
+        departmentListView = (ListView) findViewById(R.id.departmentListView);
         departmentListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -81,7 +105,7 @@ public class DepartmentActivity extends Activity {
         } else {
             errorToast(context);
 
-            SharedPreferences sharedPreferences = getSharedPreferences("cacheDepartments", MODE_PRIVATE);
+            sharedPreferences = getSharedPreferences("cacheDepartments", MODE_PRIVATE);
             String json = sharedPreferences.getString(departmentsRequest, "isEmpty");
             if(!json.equals("isEmpty")) {
                 updateUI(json);
