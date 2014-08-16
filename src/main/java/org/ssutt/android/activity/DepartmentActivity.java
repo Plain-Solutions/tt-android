@@ -4,7 +4,6 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -12,7 +11,6 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -27,8 +25,10 @@ import org.ssutt.android.api.ApiRequests;
 import org.ssutt.android.deserializer.DepartmentDeserializer;
 import org.ssutt.android.domain.Department;
 
-import static org.ssutt.android.api.ApiConnector.*;
+import static org.ssutt.android.api.ApiConnector.cacheNoFoundToast;
+import static org.ssutt.android.api.ApiConnector.cacheToast;
 import static org.ssutt.android.api.ApiConnector.errorToast;
+import static org.ssutt.android.api.ApiConnector.isInternetAvailable;
 
 public class DepartmentActivity extends Activity {
     private static final String DEPARTMENT = "department";
@@ -46,14 +46,16 @@ public class DepartmentActivity extends Activity {
         context = this;
 
         SharedPreferences sharedPreferences = getSharedPreferences("pref", MODE_PRIVATE);
-        if(sharedPreferences.getBoolean("firstTime", true)) {
+        final boolean firstTime = sharedPreferences.getBoolean("firstTime", true);
+        boolean forSearch = getIntent().getBooleanExtra("forSearch", false);
+
+        if (firstTime) {
             new AlertDialog.Builder(this)
-                    .setIcon(android.R.drawable.ic_dialog_alert)
                     .setTitle("Добро пожаловать!")
                     .setMessage("Выберите Ваш факультет и группу!")
                     .setPositiveButton("Далее", null)
                     .show();
-        } else {
+        } else if (!forSearch) {
             String department = sharedPreferences.getString("myDepartment", "");
             String group = sharedPreferences.getString("myGroup", "");
 
@@ -76,6 +78,9 @@ public class DepartmentActivity extends Activity {
                 Intent intent = new Intent(context, GroupActivity.class);
                 intent.putExtra(DEPARTMENT, departments[position]);
                 startActivity(intent);
+                if(firstTime) {
+                    DepartmentActivity.this.finish();
+                }
             }
         });
 
@@ -107,7 +112,7 @@ public class DepartmentActivity extends Activity {
 
             sharedPreferences = getSharedPreferences("cacheDepartments", MODE_PRIVATE);
             String json = sharedPreferences.getString(departmentsRequest, "isEmpty");
-            if(!json.equals("isEmpty")) {
+            if (!json.equals("isEmpty")) {
                 updateUI(json);
                 cacheToast(context);
             } else {
@@ -129,6 +134,23 @@ public class DepartmentActivity extends Activity {
         departmentListView.setAdapter(adapter);
     }
 
+    private String[] processDepartments(Department... departments) {
+        String[] departmentNames = new String[departments.length];
+
+        for (int i = 0; i < departments.length; i++) {
+            departmentNames[i] = departments[i].getName();
+            departmentNames[i] = departmentNames[i].replaceAll("[Фф]акультет", "");
+            departmentNames[i] = departmentNames[i].replaceAll("[Ии]нститут", "");
+            departmentNames[i] = departmentNames[i].trim();
+
+            StringBuilder sb = new StringBuilder(departmentNames[i]);
+            sb.setCharAt(0, Character.toUpperCase(sb.charAt(0)));
+            departmentNames[i] = sb.toString();
+        }
+
+        return departmentNames;
+    }
+
     private class DepartmentTask extends ApiConnector {
         @Override
         protected void onPreExecute() {
@@ -145,22 +167,5 @@ public class DepartmentActivity extends Activity {
             updateUI(json);
             swipeLayout.setRefreshing(false);
         }
-    }
-
-    private String[] processDepartments(Department... departments) {
-        String[] departmentNames = new String[departments.length];
-
-        for (int i = 0; i < departments.length; i++) {
-            departmentNames[i] = departments[i].getName();
-            departmentNames[i] = departmentNames[i].replaceAll("[Фф]акультет", "");
-            departmentNames[i] = departmentNames[i].replaceAll("[Ии]нститут", "");
-            departmentNames[i] = departmentNames[i].trim();
-
-            StringBuilder sb = new StringBuilder(departmentNames[i]);
-            sb.setCharAt(0, Character.toUpperCase(sb.charAt(0)));
-            departmentNames[i] = sb.toString();
-        }
-
-        return departmentNames;
     }
 }

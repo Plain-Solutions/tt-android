@@ -110,6 +110,8 @@ public abstract class AbstractTab extends Fragment {
     }
 
     public void refreshSchedule(String department, String group) {
+        System.out.println("THIIIIIIIIIIIIS 11111" + department + " " + group );
+
         DayType dayType;
         SharedPreferences preferences = context.getSharedPreferences("pref", MODE_PRIVATE);
         if (preferences.getBoolean("btnNumerator", false)) {
@@ -139,6 +141,7 @@ public abstract class AbstractTab extends Fragment {
     }
 
     public void refreshSchedule(Context context, DayType dayType, String department, String group) {
+        System.out.println("THIIIIIIIIIIIIS " + department + " " + group );
         String scheduleRequest = ApiRequests.getSchedule(department, group);
         if (isInternetAvailable(context)) {
             ScheduleTask scheduleTask = new ScheduleTask(dayType);

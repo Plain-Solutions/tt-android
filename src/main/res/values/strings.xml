@@ -34,4 +34,12 @@
         <item>Пятница</item>
         <item>Суббота</item>
     </string-array>
+
+    <string-array name="menu_options_array">
+        <item>Моя группа</item>
+        <item>Информация</item>
+        <item>Сохраненные</item>
+        <item>Поиск</item>
+        <item>Настройки</item>
+    </string-array>
 </resources>

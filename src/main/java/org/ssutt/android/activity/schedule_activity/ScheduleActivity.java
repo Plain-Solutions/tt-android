@@ -1,6 +1,7 @@
 package org.ssutt.android.activity.schedule_activity;
 
 import android.app.ActionBar;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -27,8 +28,6 @@ import org.ssutt.android.activity.schedule_activity.tabs.TabSaturday;
 import org.ssutt.android.activity.schedule_activity.tabs.TabThursday;
 import org.ssutt.android.activity.schedule_activity.tabs.TabTuesday;
 import org.ssutt.android.activity.schedule_activity.tabs.TabWednesday;
-import org.ssutt.android.adapter.ScheduleListAdapter;
-import org.ssutt.android.domain.Department;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -44,7 +43,6 @@ public class ScheduleActivity extends FragmentActivity {
 
     private PagerAdapter pagerAdapter;
     private ViewPager pager;
-    private String[] mPlanetTitles;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
 
@@ -154,15 +152,21 @@ public class ScheduleActivity extends FragmentActivity {
             }
         });
 
-        mPlanetTitles = getResources().getStringArray(R.array.days_array);
+        String[] menuOptionsArray = getResources().getStringArray(R.array.menu_options_array);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
-        mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.list_item, mPlanetTitles));
+        mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.list_item, menuOptionsArray));
         mDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-                System.out.println(mPlanetTitles[position]);
+                switch (position) {
+                    case 3:
+                        Intent intent = new Intent(getApplicationContext(), DepartmentActivity.class);
+                        intent.putExtra("forSearch", true);
+                        startActivity(intent);
+                        break;
+                }
             }
         });
 
