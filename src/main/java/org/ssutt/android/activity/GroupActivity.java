@@ -60,7 +60,7 @@ public class GroupActivity extends Activity {
                     editor.putString("myDepartment", department.getTag());
                     editor.putString("myGroup", groupNames[position]);
                     editor.putBoolean("firstTime", false);
-                    editor.commit();
+                    editor.apply();
                 }
 
                 Intent intent = new Intent(context, ScheduleActivity.class);
@@ -137,7 +137,7 @@ public class GroupActivity extends Activity {
             SharedPreferences sharedPreferences = getSharedPreferences("cacheGroups", MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putString(getUrl(), json);
-            editor.commit();
+            editor.apply();
 
             updateUI(json);
             swipeLayout.setRefreshing(false);

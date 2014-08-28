@@ -154,7 +154,7 @@ public class DepartmentActivity extends Activity {
             SharedPreferences sharedPreferences = getSharedPreferences("cacheDepartments", MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putString(getUrl(), json);
-            editor.commit();
+            editor.apply();
 
             updateUI(json);
             swipeLayout.setRefreshing(false);

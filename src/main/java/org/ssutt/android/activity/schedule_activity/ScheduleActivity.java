@@ -1,6 +1,7 @@
 package org.ssutt.android.activity.schedule_activity;
 
 import android.app.ActionBar;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -18,6 +19,10 @@ import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+
 import org.ssutt.android.R;
 import org.ssutt.android.activity.DepartmentActivity;
 import org.ssutt.android.activity.schedule_activity.tabs.AbstractTab;
@@ -28,12 +33,18 @@ import org.ssutt.android.activity.schedule_activity.tabs.TabSaturday;
 import org.ssutt.android.activity.schedule_activity.tabs.TabThursday;
 import org.ssutt.android.activity.schedule_activity.tabs.TabTuesday;
 import org.ssutt.android.activity.schedule_activity.tabs.TabWednesday;
+import org.ssutt.android.api.ApiConnector;
+import org.ssutt.android.api.ApiRequests;
+import org.ssutt.android.deserializer.MessageDeserializer;
+import org.ssutt.android.domain.Message;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
 import info.hoang8f.android.segmented.SegmentedGroup;
+
+import static org.ssutt.android.api.ApiConnector.isInternetAvailable;
 
 public class ScheduleActivity extends FragmentActivity {
     private static final String DEPARTMENT = "department";
@@ -160,6 +171,7 @@ public class ScheduleActivity extends FragmentActivity {
         mDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+
                 switch (position) {
                     case 0:
                         SharedPreferences pref = getApplicationContext().getSharedPreferences("pref", MODE_PRIVATE);
@@ -178,6 +190,20 @@ public class ScheduleActivity extends FragmentActivity {
                         intent.putExtra(DEPARTMENT, myDepartment);
                         intent.putExtra(GROUP, myGroup);
                         startActivity(intent);
+                        break;
+                    case 1:
+                        extras = getIntent().getExtras();
+                        String departmentTag = extras.getString(DEPARTMENT);
+                        String request = ApiRequests.getDepartmentMsg(departmentTag);
+
+                        if (isInternetAvailable(getApplicationContext())) {
+                            DepartmentMessageTask departmentMessageTask = new DepartmentMessageTask();
+                            departmentMessageTask.execute(request);
+                        } else {
+                            SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("cachedMsg", MODE_PRIVATE);
+                            String json = sharedPreferences.getString(request, "Group information not found!");
+                            updateUI(json);
+                        }
                         break;
                     case 3:
                         intent = new Intent(getApplicationContext(), DepartmentActivity.class);
@@ -222,5 +248,29 @@ public class ScheduleActivity extends FragmentActivity {
                 actionBar.setCustomView(actionBarLayout);
             }
         });
+    }
+
+    class DepartmentMessageTask extends ApiConnector {
+        @Override
+        protected void onPostExecute(String json) {
+            SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("cachedMsg", MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString(getUrl(), json);
+            editor.apply();
+
+            updateUI(json);
+        }
+    }
+
+    private void updateUI(String json) {
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.registerTypeAdapter(Message.class, new MessageDeserializer());
+        JsonElement jsonElement = new JsonParser().parse(json);
+
+        new AlertDialog.Builder(this)
+                .setTitle("Department information:")
+                .setMessage(jsonElement.getAsJsonObject().get("msg").toString())
+                .setPositiveButton("ok", null)
+                .show();
     }
 }

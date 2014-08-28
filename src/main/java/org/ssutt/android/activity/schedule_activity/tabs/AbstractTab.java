@@ -241,7 +241,7 @@ public abstract class AbstractTab extends Fragment {
             SharedPreferences sharedPreferences = context.getSharedPreferences("cacheSchedule", MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putString(getUrl(), json);
-            editor.commit();
+            editor.apply();
 
             updateUI(dayType, json);
             swipeLayout.setRefreshing(false);
