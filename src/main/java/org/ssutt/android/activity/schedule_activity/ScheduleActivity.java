@@ -21,10 +21,12 @@ import android.widget.TextView;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import org.ssutt.android.R;
 import org.ssutt.android.activity.DepartmentActivity;
+import org.ssutt.android.activity.StaredGroupsActivity;
 import org.ssutt.android.activity.schedule_activity.tabs.AbstractTab;
 import org.ssutt.android.activity.schedule_activity.tabs.DayType;
 import org.ssutt.android.activity.schedule_activity.tabs.TabFriday;
@@ -66,7 +68,8 @@ public class ScheduleActivity extends FragmentActivity {
 
     private void initialisePaging() {
         final View actionBarLayout = getLayoutInflater().inflate(R.layout.action_bar, null);
-        ImageButton btnShowMenu = (ImageButton) actionBarLayout.findViewById(R.id.imageButton);
+        ImageButton btnShowMenu = (ImageButton) actionBarLayout.findViewById(R.id.btnNavigationDrawer);
+        final ImageButton btnStar = (ImageButton) actionBarLayout.findViewById(R.id.btnStar);
         final TextView settingsTextView = (TextView) actionBarLayout.findViewById(R.id.settingsTextView);
         settingsTextView.setVisibility(View.GONE);
 
@@ -201,9 +204,14 @@ public class ScheduleActivity extends FragmentActivity {
                             departmentMessageTask.execute(request);
                         } else {
                             SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("cachedMsg", MODE_PRIVATE);
-                            String json = sharedPreferences.getString(request, "Group information not found!");
+                            String json = sharedPreferences.getString(request, "Department information not found!");
                             updateUI(json);
                         }
+                        break;
+
+                    case 2:
+                        intent = new Intent(getApplicationContext(), StaredGroupsActivity.class);
+                        startActivity(intent);
                         break;
                     case 3:
                         intent = new Intent(getApplicationContext(), DepartmentActivity.class);
@@ -248,6 +256,34 @@ public class ScheduleActivity extends FragmentActivity {
                 actionBar.setCustomView(actionBarLayout);
             }
         });
+
+        final SharedPreferences starGroups = getApplicationContext().getSharedPreferences("star", MODE_PRIVATE);
+        String tag = department + "&" + group;
+        final boolean isStared = starGroups.getBoolean(tag, false);
+
+        if(isStared) {
+            btnStar.setBackgroundResource(android.R.drawable.star_big_on);
+        } else {
+            btnStar.setBackgroundResource(android.R.drawable.star_big_off);
+        }
+
+        btnStar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SharedPreferences.Editor editor = starGroups.edit();
+                String tag = department + "&" + group;
+                boolean curIsStared = starGroups.getBoolean(tag, false);
+
+                if(curIsStared) {
+                    editor.putBoolean(tag, false);
+                    btnStar.setBackgroundResource(android.R.drawable.star_big_off);
+                } else{
+                    editor.putBoolean(tag, true);
+                    btnStar.setBackgroundResource(android.R.drawable.star_big_on);
+                }
+                editor.apply();
+            }
+        });
     }
 
     class DepartmentMessageTask extends ApiConnector {
@@ -266,10 +302,13 @@ public class ScheduleActivity extends FragmentActivity {
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(Message.class, new MessageDeserializer());
         JsonElement jsonElement = new JsonParser().parse(json);
+        JsonObject jsonObject = jsonElement.getAsJsonObject();
+
+        Message message = gsonBuilder.create().fromJson(jsonObject, Message.class);
 
         new AlertDialog.Builder(this)
                 .setTitle("Department information:")
-                .setMessage(jsonElement.getAsJsonObject().get("msg").toString())
+                .setMessage(message.getMessage())
                 .setPositiveButton("ok", null)
                 .show();
     }

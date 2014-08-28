@@ -10,7 +10,7 @@
         android:contentDescription="@android:string/yes"
         android:layout_width="20dp"
         android:layout_height="wrap_content"
-        android:id="@+id/imageButton"
+        android:id="@+id/btnNavigationDrawer"
         android:background="@drawable/ic_navigation_drawer"
         android:layout_gravity="center_vertical" />
 
@@ -31,13 +31,20 @@
         android:layout_gravity="center">
 
         <Spinner
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/daysSpinner"
             android:spinnerMode="dropdown"
             android:layout_gravity="center"
             android:gravity="center" />
-
     </LinearLayout>
+
+    <ImageButton
+        android:contentDescription="@android:string/yes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/btnStar"
+        android:background="@android:drawable/btn_star_big_off"
+        android:layout_gravity="center_vertical" />
 
 </LinearLayout>
