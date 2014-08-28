@@ -110,7 +110,7 @@ public class ScheduleActivity extends FragmentActivity {
         final SegmentedGroup segmentedGroup = (SegmentedGroup) findViewById(R.id.segmentGroup);
         segmentedGroup.check(R.id.btnNumerator);
         SharedPreferences preferences = getSharedPreferences("pref", MODE_PRIVATE);
-        SharedPreferences.Editor editor = preferences.edit();
+        final SharedPreferences.Editor editor = preferences.edit();
 
         editor.putBoolean("btnNumerator", true);
         editor.apply();
@@ -161,12 +161,32 @@ public class ScheduleActivity extends FragmentActivity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
                 switch (position) {
+                    case 0:
+                        SharedPreferences pref = getApplicationContext().getSharedPreferences("pref", MODE_PRIVATE);
+                        Bundle extras = getIntent().getExtras();
+
+                        String department = extras.getString(DEPARTMENT);
+                        String group = extras.getString(GROUP);
+                        String myDepartment = pref.getString("myDepartment", "empty");
+                        String myGroup = pref.getString("myGroup", "empty");
+
+                        if(department.equals(myDepartment) && group.equals(myGroup)) {
+                            break;
+                        }
+
+                        Intent intent = new Intent(getApplicationContext(), ScheduleActivity.class);
+                        intent.putExtra(DEPARTMENT, myDepartment);
+                        intent.putExtra(GROUP, myGroup);
+                        startActivity(intent);
+                        break;
                     case 3:
-                        Intent intent = new Intent(getApplicationContext(), DepartmentActivity.class);
+                        intent = new Intent(getApplicationContext(), DepartmentActivity.class);
                         intent.putExtra("forSearch", true);
                         startActivity(intent);
                         break;
                 }
+
+                mDrawerLayout.closeDrawers();
             }
         });
 

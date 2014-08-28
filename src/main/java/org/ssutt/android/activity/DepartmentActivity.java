@@ -25,9 +25,6 @@ import org.ssutt.android.api.ApiRequests;
 import org.ssutt.android.deserializer.DepartmentDeserializer;
 import org.ssutt.android.domain.Department;
 
-import static org.ssutt.android.api.ApiConnector.cacheNoFoundToast;
-import static org.ssutt.android.api.ApiConnector.cacheToast;
-import static org.ssutt.android.api.ApiConnector.errorToast;
 import static org.ssutt.android.api.ApiConnector.isInternetAvailable;
 
 public class DepartmentActivity extends Activity {
@@ -62,6 +59,7 @@ public class DepartmentActivity extends Activity {
             Intent intent = new Intent(context, ScheduleActivity.class);
             intent.putExtra(DEPARTMENT, department);
             intent.putExtra(GROUP, group);
+
             startActivity(intent);
             DepartmentActivity.this.finish();
         }
@@ -78,7 +76,7 @@ public class DepartmentActivity extends Activity {
                 Intent intent = new Intent(context, GroupActivity.class);
                 intent.putExtra(DEPARTMENT, departments[position]);
                 startActivity(intent);
-                if(firstTime) {
+                if (firstTime) {
                     DepartmentActivity.this.finish();
                 }
             }
@@ -93,7 +91,6 @@ public class DepartmentActivity extends Activity {
                     DepartmentTask scheduleTask = new DepartmentTask();
                     scheduleTask.execute(departmentsRequest);
                 } else {
-                    errorToast(context);
                     swipeLayout.setRefreshing(false);
                 }
             }
@@ -108,15 +105,10 @@ public class DepartmentActivity extends Activity {
             DepartmentTask departmentTask = new DepartmentTask();
             departmentTask.execute(departmentsRequest);
         } else {
-            errorToast(context);
-
             sharedPreferences = getSharedPreferences("cacheDepartments", MODE_PRIVATE);
             String json = sharedPreferences.getString(departmentsRequest, "isEmpty");
             if (!json.equals("isEmpty")) {
                 updateUI(json);
-                cacheToast(context);
-            } else {
-                cacheNoFoundToast(context);
             }
         }
     }

@@ -20,15 +20,11 @@ import org.ssutt.android.R;
 import org.ssutt.android.activity.schedule_activity.ScheduleActivity;
 import org.ssutt.android.adapter.GroupListAdapter;
 import org.ssutt.android.api.ApiConnector;
-import org.ssutt.android.api.ApiRequests;
 import org.ssutt.android.api.GroupMode;
 import org.ssutt.android.deserializer.GroupDeserializer;
 import org.ssutt.android.domain.Department;
 import org.ssutt.android.domain.Group;
 
-import static org.ssutt.android.api.ApiConnector.cacheNoFoundToast;
-import static org.ssutt.android.api.ApiConnector.cacheToast;
-import static org.ssutt.android.api.ApiConnector.errorToast;
 import static org.ssutt.android.api.ApiConnector.isInternetAvailable;
 import static org.ssutt.android.api.ApiRequests.getGroups;
 
@@ -59,7 +55,7 @@ public class GroupActivity extends Activity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 SharedPreferences sharedPreferences = getSharedPreferences("pref", MODE_PRIVATE);
                 boolean firstTime = sharedPreferences.getBoolean("firstTime", true);
-                if(firstTime) {
+                if (firstTime) {
                     SharedPreferences.Editor editor = sharedPreferences.edit();
                     editor.putString("myDepartment", department.getTag());
                     editor.putString("myGroup", groupNames[position]);
@@ -72,7 +68,7 @@ public class GroupActivity extends Activity {
                 intent.putExtra(GROUP, groupNames[position]);
                 startActivity(intent);
 
-                if(firstTime) {
+                if (firstTime) {
                     GroupActivity.this.finish();
                 }
             }
@@ -86,7 +82,6 @@ public class GroupActivity extends Activity {
                     GroupTask scheduleTask = new GroupTask();
                     scheduleTask.execute(groupsRequest);
                 } else {
-                    errorToast(context);
                     swipeLayout.setRefreshing(false);
                 }
             }
@@ -101,15 +96,10 @@ public class GroupActivity extends Activity {
             GroupTask scheduleTask = new GroupTask();
             scheduleTask.execute(groupsRequest);
         } else {
-            errorToast(context);
-
             SharedPreferences sharedPreferences = getSharedPreferences("cacheGroups", MODE_PRIVATE);
             String json = sharedPreferences.getString(groupsRequest, "isEmpty");
-            if(!json.equals("isEmpty")) {
+            if (!json.equals("isEmpty")) {
                 updateUI(json);
-                cacheToast(context);
-            } else {
-                cacheNoFoundToast(context);
             }
         }
     }
@@ -125,6 +115,14 @@ public class GroupActivity extends Activity {
 
         GroupListAdapter groupAdapter = new GroupListAdapter(context, groupNames);
         groupListView.setAdapter(groupAdapter);
+    }
+
+    private void processGroups(Group[] groups) {
+        groupNames = new String[groups.length];
+        int i = 0;
+        for (Group group : groups) {
+            groupNames[i++] = group.getName();
+        }
     }
 
     private class GroupTask extends ApiConnector {
@@ -143,14 +141,6 @@ public class GroupActivity extends Activity {
 
             updateUI(json);
             swipeLayout.setRefreshing(false);
-        }
-    }
-
-    private void processGroups(Group[] groups) {
-        groupNames = new String[groups.length];
-        int i = 0;
-        for (Group group : groups) {
-            groupNames[i++] = group.getName();
         }
     }
 }

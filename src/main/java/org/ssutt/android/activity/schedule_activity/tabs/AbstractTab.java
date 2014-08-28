@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,13 +19,10 @@ import com.google.gson.JsonParser;
 
 import org.ssutt.android.R;
 import org.ssutt.android.activity.SubjectDetailsActivity;
-import org.ssutt.android.adapter.DepartmentListAdapter;
 import org.ssutt.android.adapter.ScheduleListAdapter;
 import org.ssutt.android.api.ApiConnector;
 import org.ssutt.android.api.ApiRequests;
-import org.ssutt.android.deserializer.DepartmentDeserializer;
 import org.ssutt.android.deserializer.LessonDeserializer;
-import org.ssutt.android.domain.Department;
 import org.ssutt.android.domain.Lesson.Lesson;
 import org.ssutt.android.domain.Lesson.Subgroup;
 import org.ssutt.android.domain.Lesson.Subject;
@@ -37,15 +33,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import static android.content.Context.*;
-import static android.support.v4.view.ViewPager.*;
+import static android.content.Context.MODE_PRIVATE;
 import static org.ssutt.android.activity.schedule_activity.tabs.DayType.DENOMINATOR;
 import static org.ssutt.android.activity.schedule_activity.tabs.DayType.FULL;
 import static org.ssutt.android.activity.schedule_activity.tabs.DayType.NUMERATOR;
 import static org.ssutt.android.adapter.ScheduleListAdapter.TYPE_ITEM;
-import static org.ssutt.android.api.ApiConnector.cacheNoFoundToast;
-import static org.ssutt.android.api.ApiConnector.cacheToast;
-import static org.ssutt.android.api.ApiConnector.errorToast;
 import static org.ssutt.android.api.ApiConnector.isInternetAvailable;
 
 public abstract class AbstractTab extends Fragment {
@@ -110,8 +102,6 @@ public abstract class AbstractTab extends Fragment {
     }
 
     public void refreshSchedule(String department, String group) {
-        System.out.println("THIIIIIIIIIIIIS 11111" + department + " " + group );
-
         DayType dayType;
         SharedPreferences preferences = context.getSharedPreferences("pref", MODE_PRIVATE);
         if (preferences.getBoolean("btnNumerator", false)) {
@@ -125,15 +115,10 @@ public abstract class AbstractTab extends Fragment {
             ScheduleTask scheduleTask = new ScheduleTask(dayType);
             scheduleTask.execute(scheduleRequest);
         } else {
-            errorToast(context);
-
             SharedPreferences sharedPreferences = context.getSharedPreferences("cacheSchedule", MODE_PRIVATE);
             String json = sharedPreferences.getString(scheduleRequest, "isEmpty");
-            if(!json.equals("isEmpty")) {
+            if (!json.equals("isEmpty")) {
                 updateUI(dayType, json);
-                cacheToast(context);
-            } else {
-                cacheNoFoundToast(context);
             }
 
             swipeLayout.setRefreshing(false);
@@ -141,21 +126,15 @@ public abstract class AbstractTab extends Fragment {
     }
 
     public void refreshSchedule(Context context, DayType dayType, String department, String group) {
-        System.out.println("THIIIIIIIIIIIIS " + department + " " + group );
         String scheduleRequest = ApiRequests.getSchedule(department, group);
         if (isInternetAvailable(context)) {
             ScheduleTask scheduleTask = new ScheduleTask(dayType);
             scheduleTask.execute(scheduleRequest);
         } else {
-            errorToast(context);
-
             SharedPreferences sharedPreferences = context.getSharedPreferences("cacheSchedule", MODE_PRIVATE);
             String json = sharedPreferences.getString(scheduleRequest, "isEmpty");
-            if(!json.equals("isEmpty")) {
+            if (!json.equals("isEmpty")) {
                 updateUI(dayType, json);
-                cacheToast(context);
-            } else {
-                cacheNoFoundToast(context);
             }
         }
     }
@@ -167,8 +146,8 @@ public abstract class AbstractTab extends Fragment {
         String activity = subject.getActivity();
         subjectDetails.add(
                 activity.equals("lecture") ? context.getString(R.string.lecture) :
-                activity.equals("practice") ? context.getString(R.string.practice) :
-                context.getString(R.string.lab)
+                        activity.equals("practice") ? context.getString(R.string.practice) :
+                                context.getString(R.string.lab)
         );
 
         Lesson lesson = scheduleByDay.get(getDayOfWeek()).get(lessonBySubject.get(subject));
@@ -177,8 +156,8 @@ public abstract class AbstractTab extends Fragment {
         int parity = subject.getParity();
         subjectDetails.add(
                 parity == 0 ? context.getString(R.string.numerator) :
-                parity == 1 ? context.getString(R.string.denominator) :
-                context.getString(R.string.both)
+                        parity == 1 ? context.getString(R.string.denominator) :
+                                context.getString(R.string.both)
         );
 
         for (Subgroup subgroup : subject.getSubgroup()) {
@@ -228,7 +207,7 @@ public abstract class AbstractTab extends Fragment {
                 for (Subject subject : lesson.getSubject()) {
                     int parity = subject.getParity();
                     if (parity == dayType.ordinal() || parity == FULL.ordinal()) {
-                        if(!isTimeAdded) {
+                        if (!isTimeAdded) {
                             String time = times[lesson.getSequence() - 1];
                             scheduleListAdapter.addSectionHeaderItem(time);
                             isTimeAdded = true;
