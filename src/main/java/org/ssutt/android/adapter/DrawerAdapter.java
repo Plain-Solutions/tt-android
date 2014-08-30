@@ -57,11 +57,11 @@ public class DrawerAdapter extends BaseAdapter {
                 icon.setBackgroundResource(R.drawable.ic_star);
                 break;
             case 3:
-                icon.setBackgroundResource(R.drawable.abc_ic_search);
+                icon.setBackgroundResource(R.drawable.ic_search);
                 break;
             case 4:
+                icon.setBackgroundResource(R.drawable.ic_settings);
                 break;
-
         }
 
         return convertView;
