@@ -9,6 +9,7 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import org.ssutt.android.R;
+import org.ssutt.android.Typefaces;
 
 import java.util.List;
 
@@ -46,10 +47,12 @@ public class StaredGroupsListAdapter extends ArrayAdapter<String> {
 
         departmentTextView.setText(department);
         groupTextView.setText(group);
+        departmentTextView.setTypeface(Typefaces.get(getContext(), "fonts/helvetica-light.otf"));
+        groupTextView.setTypeface(Typefaces.get(getContext(), "fonts/helvetica-light.otf"));
 
         if (staredGroups.get(3 * position + 2).equals(myDepartment) && group.equals(myGroup)) {
-            departmentTextView.setTypeface(Typeface.DEFAULT_BOLD);
-            groupTextView.setTypeface(Typeface.DEFAULT_BOLD);
+            departmentTextView.setTypeface(Typefaces.get(getContext(), "fonts/helvetica-bold"));
+            groupTextView.setTypeface(Typefaces.get(getContext(), "fonts/helvetica-bold"));
         }
 
         return view;

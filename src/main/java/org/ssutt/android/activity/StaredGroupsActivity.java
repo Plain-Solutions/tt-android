@@ -8,8 +8,10 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import org.ssutt.android.R;
+import org.ssutt.android.Typefaces;
 import org.ssutt.android.activity.schedule_activity.ScheduleActivity;
 import org.ssutt.android.adapter.StaredGroupsListAdapter;
 
@@ -31,6 +33,10 @@ public class StaredGroupsActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.stared_groups_view);
 
+        int actionBarTitleid = getResources().getIdentifier("action_bar_title", "id", "android");
+        TextView actionBarTitle = (TextView) findViewById(actionBarTitleid);
+        actionBarTitle.setTypeface(Typefaces.get(this, "fonts/helvetica-bold"));
+        
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayShowHomeEnabled(false);
         actionBar.setTitle(getString(R.string.staredGroups));

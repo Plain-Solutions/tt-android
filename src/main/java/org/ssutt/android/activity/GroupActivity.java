@@ -10,6 +10,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -17,6 +18,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
 import org.ssutt.android.R;
+import org.ssutt.android.Typefaces;
 import org.ssutt.android.activity.schedule_activity.ScheduleActivity;
 import org.ssutt.android.adapter.GroupListAdapter;
 import org.ssutt.android.api.ApiConnector;
@@ -51,6 +53,10 @@ public class GroupActivity extends ActionBarActivity {
         groupListView = (ListView) findViewById(R.id.groupListView);
         swipeLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_container);
         context = this;
+
+        int actionBarTitleid = getResources().getIdentifier("action_bar_title", "id", "android");
+        TextView actionBarTitle = (TextView) findViewById(actionBarTitleid);
+        actionBarTitle.setTypeface(Typefaces.get(this, "fonts/helvetica-bold"));
 
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayShowHomeEnabled(false);

@@ -1,8 +1,10 @@
 package org.ssutt.android.activity.schedule_activity;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
@@ -10,11 +12,14 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -26,6 +31,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import org.ssutt.android.R;
+import org.ssutt.android.Typefaces;
 import org.ssutt.android.activity.DepartmentActivity;
 import org.ssutt.android.activity.SettingsActivity;
 import org.ssutt.android.activity.StaredGroupsActivity;
@@ -38,6 +44,7 @@ import org.ssutt.android.activity.schedule_activity.tabs.TabThursday;
 import org.ssutt.android.activity.schedule_activity.tabs.TabTuesday;
 import org.ssutt.android.activity.schedule_activity.tabs.TabWednesday;
 import org.ssutt.android.adapter.DrawerAdapter;
+import org.ssutt.android.adapter.SpinnerDayAdapter;
 import org.ssutt.android.api.ApiConnector;
 import org.ssutt.android.api.ApiRequests;
 import org.ssutt.android.deserializer.MessageDeserializer;
@@ -84,6 +91,7 @@ public class ScheduleActivity extends ActionBarActivity {
         final ImageButton btnStar = (ImageButton) actionBarLayout.findViewById(R.id.btnStar);
         final TextView settingsTextView = (TextView) actionBarLayout.findViewById(R.id.settingsTextView);
         settingsTextView.setVisibility(View.GONE);
+        settingsTextView.setTypeface(Typefaces.get(this, "fonts/helvetica-bold"));
 
         final ActionBar actionBar = getSupportActionBar();
         actionBar.setCustomView(actionBarLayout);
@@ -114,8 +122,9 @@ public class ScheduleActivity extends ActionBarActivity {
         pager.setAdapter(this.pagerAdapter);
 
 
-        final String[] data = this.getResources().getStringArray(R.array.days_array);
-        ArrayAdapter<String> daysSpinnerAdapter = new ArrayAdapter<String>(this, R.layout.days_spinner_view, data);
+        final String[] data = getResources().getStringArray(R.array.days_array);
+        SpinnerDayAdapter daysSpinnerAdapter = new SpinnerDayAdapter(this, data);
+        //ArrayAdapter<String> daysSpinnerAdapter = new ArrayAdapter<String>(this, R.layout.days_spinner_view, data);
         daysSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         final Spinner daysSpinner = (Spinner) actionBarLayout.findViewById(R.id.daysSpinner);
@@ -160,6 +169,13 @@ public class ScheduleActivity extends ActionBarActivity {
                 editor.apply();
             }
         });
+
+        RadioButton btnNumerator = (RadioButton) findViewById(R.id.btnNumerator);
+        RadioButton btnDenominator = (RadioButton) findViewById(R.id.btnDenominator);
+
+        Typeface typeface = Typefaces.get(this, "fonts/helvetica-light.otf");
+        btnNumerator.setTypeface(typeface);
+        btnDenominator.setTypeface(typeface);
 
         pager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -286,9 +302,9 @@ public class ScheduleActivity extends ActionBarActivity {
         boolean isStared = starGroups.getBoolean(tag, false);
 
         if (isStared) {
-            btnStar.setBackgroundResource(android.R.drawable.star_big_on);
+            btnStar.setBackgroundResource(android.R.drawable.btn_star_big_on);
         } else {
-            btnStar.setBackgroundResource(android.R.drawable.star_big_off);
+            btnStar.setBackgroundResource(android.R.drawable.btn_star_big_off);
         }
 
         btnStar.setOnClickListener(new View.OnClickListener() {
@@ -305,13 +321,13 @@ public class ScheduleActivity extends ActionBarActivity {
                 if (curIsStared) {
                     if (!(myDepartment.equals(department) && myGroup.equals(group))) {
                         editor.putBoolean(tag, false);
-                        btnStar.setBackgroundResource(android.R.drawable.star_big_off);
+                        btnStar.setBackgroundResource(android.R.drawable.btn_star_big_off);
                     } else {
                         Toast.makeText(getApplicationContext(), getString(R.string.unstarMyGroup), Toast.LENGTH_LONG).show();
                     }
                 } else {
                     editor.putBoolean(tag, true);
-                    btnStar.setBackgroundResource(android.R.drawable.star_big_on);
+                    btnStar.setBackgroundResource(android.R.drawable.btn_star_big_on);
                 }
                 editor.apply();
             }
@@ -329,11 +345,22 @@ public class ScheduleActivity extends ActionBarActivity {
             message.setMessage(getString(R.string.emptyDepartmentInfo));
         }
 
-        new AlertDialog.Builder(this)
+        AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle(getString(R.string.departmentInfoTitle))
                 .setMessage(message.getMessage())
                 .setPositiveButton(getString(R.string.close), null)
                 .show();
+
+        Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/helvetica-light.otf");
+
+        int textViewId = dialog.getContext().getResources().getIdentifier("android:id/alertTitle", null, null);
+        TextView titleTextView = (TextView) dialog.findViewById(textViewId);
+        TextView messageTextView = (TextView) dialog.findViewById(android.R.id.message);
+        Button btnPositive = (Button) dialog.findViewById(android.R.id.button1);
+
+        titleTextView.setTypeface(typeface);
+        messageTextView.setTypeface(typeface);
+        btnPositive.setTypeface(typeface);
     }
 
     class DepartmentMessageTask extends ApiConnector {
@@ -347,4 +374,5 @@ public class ScheduleActivity extends ActionBarActivity {
             updateUI(json);
         }
     }
+
 }

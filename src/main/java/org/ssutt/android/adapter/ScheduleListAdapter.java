@@ -1,6 +1,7 @@
 package org.ssutt.android.adapter;
 
 import android.content.Context;
+import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +9,7 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import org.ssutt.android.R;
+import org.ssutt.android.Typefaces;
 import org.ssutt.android.domain.Lesson.Subject;
 
 import java.util.ArrayList;
@@ -41,10 +43,6 @@ public class ScheduleListAdapter extends BaseAdapter {
         data.add(item);
         sectionHeader.add(data.size() - 1);
         notifyDataSetChanged();
-    }
-
-    public void clear() {
-        data = new ArrayList();
     }
 
     @Override
@@ -84,6 +82,11 @@ public class ScheduleListAdapter extends BaseAdapter {
                 TextView subjectTypeTextView = (TextView) convertView.findViewById(R.id.subjectTypeTextView);
                 View lectureTypeView = convertView.findViewById(R.id.lectureTypeView);
 
+                Typeface typeface = Typefaces.get(context, "fonts/helvetica-light.otf");
+                subjectTextView.setTypeface(typeface);
+                locationTextView.setTypeface(typeface);
+                subjectTypeTextView.setTypeface(typeface);
+
                 Subject subject = (Subject) data.get(position);
                 subjectTextView.setText(subject.getName());
                 locationTextView.setText(subject.getSubgroup().size() == 1 ? subject.getSubgroup().get(0).getLocation() : context.getString(R.string.multiplyValue));
@@ -119,8 +122,8 @@ public class ScheduleListAdapter extends BaseAdapter {
 
                 TextView timeTextView = (TextView) convertView.findViewById(R.id.textView);
 
-                String time = (String) data.get(position);
-                timeTextView.setText(time);
+                timeTextView.setText((String) data.get(position));
+                timeTextView.setTypeface(Typefaces.get(context, "fonts/helvetica-bold"));
                 break;
         }
 

@@ -7,12 +7,11 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import org.ssutt.android.R;
 import org.ssutt.android.Typefaces;
 
-public class GroupListAdapter extends ArrayAdapter<String> {
-    public GroupListAdapter(Context context, String[] groups) {
-        super(context, R.layout.group_view_list_item, groups);
+public class SettingsAdapter extends ArrayAdapter<String> {
+    public SettingsAdapter(Context context, String[] settings) {
+        super(context, android.R.layout.simple_list_item_1, settings);
     }
 
     @Override
@@ -21,12 +20,12 @@ public class GroupListAdapter extends ArrayAdapter<String> {
 
         if (view == null) {
             LayoutInflater vi = LayoutInflater.from(getContext());
-            view = vi.inflate(R.layout.group_view_list_item, null);
+            view = vi.inflate(android.R.layout.simple_list_item_1, null);
         }
 
         String item = getItem(position);
         if (item != null) {
-            TextView label = (TextView) view.findViewById(R.id.groupLabel);
+            TextView label = (TextView) view.findViewById(android.R.id.text1);
             label.setText(item);
             label.setTypeface(Typefaces.get(getContext(), "fonts/helvetica-light.otf"));
         }

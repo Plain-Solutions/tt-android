@@ -4,13 +4,16 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -18,6 +21,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
 import org.ssutt.android.R;
+import org.ssutt.android.Typefaces;
 import org.ssutt.android.activity.schedule_activity.ScheduleActivity;
 import org.ssutt.android.adapter.DepartmentListAdapter;
 import org.ssutt.android.api.ApiConnector;
@@ -60,11 +64,23 @@ public class DepartmentActivity extends ActionBarActivity {
         boolean forSearch = getIntent().getBooleanExtra(FOR_SEARCH, false);
 
         if (firstTime) {
-            new AlertDialog.Builder(this)
+            AlertDialog dialog = new AlertDialog.Builder(this)
                     .setTitle(getString(R.string.welcomeTitle))
                     .setMessage(getString(R.string.welcomeText))
                     .setPositiveButton(getString(R.string.welcomeClose), null)
                     .show();
+
+            Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/helvetica-light.otf");
+
+            int textViewId = dialog.getContext().getResources().getIdentifier("android:id/alertTitle", null, null);
+            TextView titleTextView = (TextView) dialog.findViewById(textViewId);
+            TextView messageTextView = (TextView) dialog.findViewById(android.R.id.message);
+            Button btnPositive = (Button) dialog.findViewById(android.R.id.button1);
+
+            titleTextView.setTypeface(typeface);
+            messageTextView.setTypeface(typeface);
+            btnPositive.setTypeface(typeface);
+
         } else if (!forSearch) {
             String department = pref.getString(MY_DEPARTMENT, "");
             String group = pref.getString(MY_GROUP, "");
@@ -76,8 +92,12 @@ public class DepartmentActivity extends ActionBarActivity {
             intent.putExtra(DEPARTMENT_FULL_NAME, departmentFullName);
 
             startActivity(intent);
+            DepartmentActivity.this.finish();
         }
 
+        int actionBarTitleid = getResources().getIdentifier("action_bar_title", "id", "android");
+        TextView actionBarTitle = (TextView) findViewById(actionBarTitleid);
+        actionBarTitle.setTypeface(Typefaces.get(this, "fonts/helvetica-bold"));
 
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayShowHomeEnabled(false);

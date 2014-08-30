@@ -9,14 +9,17 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.ssutt.android.R;
+import org.ssutt.android.Typefaces;
 
 public class DrawerAdapter extends BaseAdapter {
     private LayoutInflater inflater;
+    private Context context;
     private String[] data;
 
     public DrawerAdapter(Context context) {
         inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         data = context.getResources().getStringArray(R.array.menu_options_array);
+        this.context = context;
     }
 
     @Override
@@ -44,7 +47,7 @@ public class DrawerAdapter extends BaseAdapter {
         TextView settingsText = (TextView) convertView.findViewById(R.id.settingsText);
 
         settingsText.setText(data[i]);
-
+        settingsText.setTypeface(Typefaces.get(context, "fonts/helvetica-light.otf"));
         switch (i) {
             case 0:
                 icon.setBackgroundResource(R.drawable.ic_home);

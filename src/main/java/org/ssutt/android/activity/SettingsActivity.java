@@ -9,9 +9,12 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.ssutt.android.R;
+import org.ssutt.android.Typefaces;
+import org.ssutt.android.adapter.SettingsAdapter;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -23,22 +26,25 @@ import static org.ssutt.android.activity.Constants.PREF;
 import static org.ssutt.android.activity.Constants.STAR;
 
 public class SettingsActivity extends ActionBarActivity {
-    private final String[] settingsItems = new String[]{
-            getString(R.string.changeMyGroup),
-            getString(R.string.cleanStaredGroups),
-            ""};
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.settings_view);
+
+        int actionBarTitleid = getResources().getIdentifier("action_bar_title", "id", "android");
+        TextView actionBarTitle = (TextView) findViewById(actionBarTitleid);
+        actionBarTitle.setTypeface(Typefaces.get(this, "fonts/helvetica-bold"));
 
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayShowHomeEnabled(false);
         actionBar.setTitle(getString(R.string.settings));
 
         ListView settingsListView = (ListView) findViewById(R.id.settingsListView);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, settingsItems);
+        SettingsAdapter adapter = new SettingsAdapter(this, new String[]{
+                getString(R.string.changeMyGroup),
+                getString(R.string.cleanStaredGroups),
+                ""});
+
         settingsListView.setAdapter(adapter);
         settingsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
