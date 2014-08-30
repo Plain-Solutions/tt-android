@@ -124,7 +124,6 @@ public class ScheduleActivity extends ActionBarActivity {
 
         final String[] data = getResources().getStringArray(R.array.days_array);
         SpinnerDayAdapter daysSpinnerAdapter = new SpinnerDayAdapter(this, data);
-        //ArrayAdapter<String> daysSpinnerAdapter = new ArrayAdapter<String>(this, R.layout.days_spinner_view, data);
         daysSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         final Spinner daysSpinner = (Spinner) actionBarLayout.findViewById(R.id.daysSpinner);

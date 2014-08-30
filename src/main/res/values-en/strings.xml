@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Timetables</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="numerator">Even</string>
+    <string name="denominator">Odd</string>
+    <string name="both">Both</string>
+
+    <string name="lecture">Lecture</string>
+    <string name="practice">Practice</string>
+    <string name="lab">Laboratory</string>
+
+    <string name="chooseDepartment">Choose department:</string>
+    <string name="chooseGroup">Choose group:</string>
+    <string name="details">Detailed schedule:</string>
+
+    <string name="multiplyValue">Multiply subgroups</string>
+
+    <string name="drawer_open">Open</string>
+    <string name="drawer_close">Close</string>
+
+    <string name="staredGroups">Saved groups:</string>
+    <string name="settings">Settings:</string>
+    <string name="staredGroupsRemoved">The list of saved groups are cleared!</string>
+    <string name="unstarMyGroup">You can\'t remove your groupe from saved. You can change group in settings.</string>
+    <string name="departmentInfoNotFound">Department information unavailable.</string>
+    <string name="departmentInfoTitle">Information:</string>
+    <string name="close">Close</string>
+    <string name="emptyDepartmentInfo">No info )</string>
+    <string name="welcomeTitle">Welcome!</string>
+    <string name="welcomeText">Choose your department and group:</string>
+    <string name="welcomeClose">Next</string>
+    <string name="emptyDay">No lessons!</string>
+    <string name="changeMyGroup">Change my group</string>
+    <string name="cleanStaredGroups">Clear saved groups</string>
+
+    <color name="red">#ff5e3a</color>
+    <color name="green">#4cd964</color>
+    <color name="blue">#66cdfc</color>
+
+    <string-array name="days_array">
+        <item>Monday</item>
+        <item>Tuesday</item>
+        <item>Wednesday</item>
+        <item>Thursday</item>
+        <item>Friday</item>
+        <item>Saturday</item>
+    </string-array>
+
+    <string-array name="menu_options_array">
+        <item>My group</item>
+        <item>Information</item>
+        <item>Saved</item>
+        <item>Search</item>
+        <item>Settings</item>
+    </string-array>
+</resources>

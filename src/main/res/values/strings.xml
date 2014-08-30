@@ -21,6 +21,7 @@
 
     <string name="drawer_open">Open</string>
     <string name="drawer_close">Close</string>
+
     <string name="staredGroups">Сохраненные группы:</string>
     <string name="settings">Настройки:</string>
     <string name="staredGroupsRemoved">Список сохраненных групп очищен!</string>

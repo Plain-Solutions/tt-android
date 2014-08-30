@@ -19,6 +19,4 @@ public class Constants {
     public static final String CACHED_GROUPS = "cacheGroups";
     public static final String CACHED_SCHEDULE = "cacheSchedule";
     public static final String CACHED_MSG = "cachedMsg";
-
-
 }
