@@ -22,6 +22,9 @@
     <string name="drawer_open">Open</string>
     <string name="drawer_close">Close</string>
     <string name="staredGroups">Сохраненные группы:</string>
+    <string name="settings">Настройки:</string>
+    <string name="staredGroupsRemoved">Список сохраненных групп очищен!</string>
+    <string name="unstarMyGroup">Нельзя удалить свою группу из избранного. Для этого смените свою группу в настройках.</string>
 
     <color name="red">#ff5e3a</color>
     <color name="green">#4cd964</color>

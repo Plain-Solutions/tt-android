@@ -1,15 +1,15 @@
 package org.ssutt.android.activity.schedule_activity;
 
-import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -18,6 +18,7 @@ import android.widget.ListView;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
@@ -26,6 +27,7 @@ import com.google.gson.JsonParser;
 
 import org.ssutt.android.R;
 import org.ssutt.android.activity.DepartmentActivity;
+import org.ssutt.android.activity.SettingsActivity;
 import org.ssutt.android.activity.StaredGroupsActivity;
 import org.ssutt.android.activity.schedule_activity.tabs.AbstractTab;
 import org.ssutt.android.activity.schedule_activity.tabs.DayType;
@@ -35,6 +37,7 @@ import org.ssutt.android.activity.schedule_activity.tabs.TabSaturday;
 import org.ssutt.android.activity.schedule_activity.tabs.TabThursday;
 import org.ssutt.android.activity.schedule_activity.tabs.TabTuesday;
 import org.ssutt.android.activity.schedule_activity.tabs.TabWednesday;
+import org.ssutt.android.adapter.DrawerAdapter;
 import org.ssutt.android.api.ApiConnector;
 import org.ssutt.android.api.ApiRequests;
 import org.ssutt.android.deserializer.MessageDeserializer;
@@ -48,10 +51,12 @@ import info.hoang8f.android.segmented.SegmentedGroup;
 
 import static org.ssutt.android.api.ApiConnector.isInternetAvailable;
 
-public class ScheduleActivity extends FragmentActivity {
+public class ScheduleActivity extends ActionBarActivity {
     private static final String DEPARTMENT = "department";
+    private static final String DEPARTMENT_FULL_NAME = "department_full_name";
     private static final String GROUP = "group";
     private String department;
+    private String departmentFullName;
     private String group;
 
     private PagerAdapter pagerAdapter;
@@ -63,7 +68,7 @@ public class ScheduleActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         super.setContentView(R.layout.schedule_view);
-        this.initialisePaging();
+        initialisePaging();
     }
 
     private void initialisePaging() {
@@ -73,18 +78,19 @@ public class ScheduleActivity extends FragmentActivity {
         final TextView settingsTextView = (TextView) actionBarLayout.findViewById(R.id.settingsTextView);
         settingsTextView.setVisibility(View.GONE);
 
-        final ActionBar actionBar = getActionBar();
+        final ActionBar actionBar = getSupportActionBar();
         actionBar.setCustomView(actionBarLayout);
         actionBar.setDisplayShowTitleEnabled(false);
         actionBar.setDisplayShowCustomEnabled(true);
         actionBar.setDisplayShowHomeEnabled(false);
 
         department = getIntent().getStringExtra(DEPARTMENT);
+        departmentFullName = getIntent().getStringExtra(DEPARTMENT_FULL_NAME);
         group = getIntent().getStringExtra(GROUP);
 
         Calendar calendar = Calendar.getInstance();
         int day = calendar.get(Calendar.DAY_OF_WEEK) - 2;
-        if(day < 0) {
+        if (day < 0) {
             day = 0;
         }
 
@@ -102,7 +108,7 @@ public class ScheduleActivity extends FragmentActivity {
 
 
         final String[] data = this.getResources().getStringArray(R.array.days_array);
-        ArrayAdapter<String> daysSpinnerAdapter = new ArrayAdapter<String>(this, R.layout.spinner_test, data);
+        ArrayAdapter<String> daysSpinnerAdapter = new ArrayAdapter<String>(this, R.layout.days_spinner_view, data);
         daysSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         final Spinner daysSpinner = (Spinner) actionBarLayout.findViewById(R.id.daysSpinner);
@@ -142,8 +148,8 @@ public class ScheduleActivity extends FragmentActivity {
                 AbstractTab item = (AbstractTab) pagerAdapter.getCurrentFragment();
                 item.refreshSchedule(getApplicationContext(), dayType, department, group);
 
-                SharedPreferences preferences = getSharedPreferences("pref", MODE_PRIVATE);
-                SharedPreferences.Editor editor = preferences.edit();
+                SharedPreferences pref = getSharedPreferences("pref", MODE_PRIVATE);
+                SharedPreferences.Editor editor = pref.edit();
                 editor.putBoolean("btnNumerator", checkedId == R.id.btnNumerator);
                 editor.apply();
             }
@@ -166,15 +172,12 @@ public class ScheduleActivity extends FragmentActivity {
             }
         });
 
-        String[] menuOptionsArray = getResources().getStringArray(R.array.menu_options_array);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
-        mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.list_item, menuOptionsArray));
+        mDrawerList.setAdapter(new DrawerAdapter(this));
         mDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-
                 switch (position) {
                     case 0:
                         SharedPreferences pref = getApplicationContext().getSharedPreferences("pref", MODE_PRIVATE);
@@ -184,14 +187,16 @@ public class ScheduleActivity extends FragmentActivity {
                         String group = extras.getString(GROUP);
                         String myDepartment = pref.getString("myDepartment", "empty");
                         String myGroup = pref.getString("myGroup", "empty");
+                        String myDepartmentFullName = pref.getString("myDepartmentFullName", "empty");
 
-                        if(department.equals(myDepartment) && group.equals(myGroup)) {
+                        if (department.equals(myDepartment) && group.equals(myGroup)) {
                             break;
                         }
 
                         Intent intent = new Intent(getApplicationContext(), ScheduleActivity.class);
                         intent.putExtra(DEPARTMENT, myDepartment);
                         intent.putExtra(GROUP, myGroup);
+                        intent.putExtra(DEPARTMENT_FULL_NAME, myDepartmentFullName);
                         startActivity(intent);
                         break;
                     case 1:
@@ -210,12 +215,22 @@ public class ScheduleActivity extends FragmentActivity {
                         break;
 
                     case 2:
+                        pref = getApplicationContext().getSharedPreferences("pref", MODE_PRIVATE);
+                        myDepartment = pref.getString("myDepartment", "empty");
+                        myGroup = pref.getString("myGroup", "empty");
+
                         intent = new Intent(getApplicationContext(), StaredGroupsActivity.class);
+                        intent.putExtra("myDepartment", myDepartment);
+                        intent.putExtra("myGroup", myGroup);
                         startActivity(intent);
                         break;
                     case 3:
                         intent = new Intent(getApplicationContext(), DepartmentActivity.class);
                         intent.putExtra("forSearch", true);
+                        startActivity(intent);
+                        break;
+                    case 4:
+                        intent = new Intent(getApplicationContext(), SettingsActivity.class);
                         startActivity(intent);
                         break;
                 }
@@ -228,15 +243,17 @@ public class ScheduleActivity extends FragmentActivity {
             @Override
             public void onDrawerOpened(View drawerView) {
                 daysSpinner.setVisibility(View.GONE);
+                btnStar.setVisibility(View.GONE);
                 settingsTextView.setVisibility(View.VISIBLE);
-                super.onDrawerOpened(drawerView);
+                supportInvalidateOptionsMenu();
             }
 
             @Override
             public void onDrawerClosed(View drawerView) {
                 daysSpinner.setVisibility(View.VISIBLE);
+                btnStar.setVisibility(View.VISIBLE);
                 settingsTextView.setVisibility(View.GONE);
-                super.onDrawerClosed(drawerView);
+                supportInvalidateOptionsMenu();
             }
         });
 
@@ -254,14 +271,17 @@ public class ScheduleActivity extends FragmentActivity {
                 }
 
                 actionBar.setCustomView(actionBarLayout);
+                supportInvalidateOptionsMenu();
             }
         });
 
         final SharedPreferences starGroups = getApplicationContext().getSharedPreferences("star", MODE_PRIVATE);
-        String tag = department + "&" + group;
+        String tag = department + "&" + group + "&" + departmentFullName;
         final boolean isStared = starGroups.getBoolean(tag, false);
 
-        if(isStared) {
+        System.out.println(tag + " " + isStared);
+
+        if (isStared) {
             btnStar.setBackgroundResource(android.R.drawable.star_big_on);
         } else {
             btnStar.setBackgroundResource(android.R.drawable.star_big_off);
@@ -270,32 +290,28 @@ public class ScheduleActivity extends FragmentActivity {
         btnStar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                SharedPreferences pref = getSharedPreferences("pref", MODE_PRIVATE);
+                String myDepartment = pref.getString("myDepartment", "empty");
+                String myGroup = pref.getString("myGroup", "empty");
+
                 SharedPreferences.Editor editor = starGroups.edit();
-                String tag = department + "&" + group;
+                String tag = department + "&" + group + "&" + departmentFullName;
                 boolean curIsStared = starGroups.getBoolean(tag, false);
 
-                if(curIsStared) {
-                    editor.putBoolean(tag, false);
-                    btnStar.setBackgroundResource(android.R.drawable.star_big_off);
-                } else{
+                if (curIsStared) {
+                    if(!myDepartment.equals(department) && !myGroup.equals(group)){
+                        editor.putBoolean(tag, false);
+                        btnStar.setBackgroundResource(android.R.drawable.star_big_off);
+                    } else {
+                        Toast.makeText(getApplicationContext(), getString(R.string.unstarMyGroup), Toast.LENGTH_LONG).show();
+                    }
+                } else {
                     editor.putBoolean(tag, true);
                     btnStar.setBackgroundResource(android.R.drawable.star_big_on);
                 }
                 editor.apply();
             }
         });
-    }
-
-    class DepartmentMessageTask extends ApiConnector {
-        @Override
-        protected void onPostExecute(String json) {
-            SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("cachedMsg", MODE_PRIVATE);
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putString(getUrl(), json);
-            editor.apply();
-
-            updateUI(json);
-        }
     }
 
     private void updateUI(String json) {
@@ -311,5 +327,17 @@ public class ScheduleActivity extends FragmentActivity {
                 .setMessage(message.getMessage())
                 .setPositiveButton("ok", null)
                 .show();
+    }
+
+    class DepartmentMessageTask extends ApiConnector {
+        @Override
+        protected void onPostExecute(String json) {
+            SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("cachedMsg", MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString(getUrl(), json);
+            editor.apply();
+
+            updateUI(json);
+        }
     }
 }

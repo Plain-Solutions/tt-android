@@ -7,7 +7,9 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textSize="17sp"
+        android:layout_marginLeft="5dp"
+        android:singleLine="true"
         android:text="Department"
         android:id="@+id/department"
         android:textColor="@android:color/black"/>
@@ -15,7 +17,8 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textSize="17sp"
+        android:layout_marginLeft="5dp"
         android:text="111"
         android:id="@+id/group"
         android:textColor="@android:color/black"/>

@@ -21,6 +21,7 @@
         <activity android:name=".activity.schedule_activity.ScheduleActivity" />
         <activity android:name=".activity.SubjectDetailsActivity" />
         <activity android:name=".activity.StaredGroupsActivity" />
+        <activity android:name=".activity.SettingsActivity" />
     </application>
 
 </manifest>

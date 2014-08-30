@@ -1,12 +1,13 @@
 package org.ssutt.android.activity;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -28,8 +29,9 @@ import org.ssutt.android.domain.Group;
 import static org.ssutt.android.api.ApiConnector.isInternetAvailable;
 import static org.ssutt.android.api.ApiRequests.getGroups;
 
-public class GroupActivity extends Activity {
+public class GroupActivity extends ActionBarActivity {
     private static final String DEPARTMENT = "department";
+    private static final String DEPARTMENT_FULL_NAME = "department_full_name";
     private static final String GROUP = "group";
 
     private SwipeRefreshLayout swipeLayout;
@@ -45,7 +47,7 @@ public class GroupActivity extends Activity {
         swipeLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_container);
         context = this;
 
-        ActionBar actionBar = getActionBar();
+        ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayShowHomeEnabled(false);
         actionBar.setTitle(getString(R.string.chooseGroup));
 
@@ -53,18 +55,29 @@ public class GroupActivity extends Activity {
         groupListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                SharedPreferences sharedPreferences = getSharedPreferences("pref", MODE_PRIVATE);
-                boolean firstTime = sharedPreferences.getBoolean("firstTime", true);
+                SharedPreferences pref = getSharedPreferences("pref", MODE_PRIVATE);
+                SharedPreferences staredPref = getSharedPreferences("star", MODE_PRIVATE);
+
+                boolean firstTime = pref.getBoolean("firstTime", true);
+
                 if (firstTime) {
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    SharedPreferences.Editor editor = pref.edit();
+                    SharedPreferences.Editor staredEditor = staredPref.edit();
+
                     editor.putString("myDepartment", department.getTag());
                     editor.putString("myGroup", groupNames[position]);
+                    editor.putString("myDepartmentFullName", department.getName());
                     editor.putBoolean("firstTime", false);
                     editor.apply();
+
+                    String tag = department.getTag() + "&" + groupNames[position] + "&" + department.getName();
+                    staredEditor.putBoolean(tag, true);
+                    staredEditor.apply();
                 }
 
                 Intent intent = new Intent(context, ScheduleActivity.class);
                 intent.putExtra(DEPARTMENT, department.getTag());
+                intent.putExtra(DEPARTMENT_FULL_NAME, department.getName());
                 intent.putExtra(GROUP, groupNames[position]);
                 startActivity(intent);
 

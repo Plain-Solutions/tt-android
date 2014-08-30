@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="match_parent"
     android:weightSum="1">
 
@@ -12,7 +12,9 @@
         android:layout_height="wrap_content"
         android:id="@+id/btnNavigationDrawer"
         android:background="@drawable/ic_navigation_drawer"
-        android:layout_gravity="center_vertical" />
+        android:layout_gravity="center_vertical"
+        android:layout_centerInParent="true"
+        android:layout_alignParentLeft="true" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -21,14 +23,10 @@
         android:id="@+id/settingsTextView"
         android:layout_gravity="center"
         android:textColor="@android:color/white"
-        android:layout_marginLeft="10dp"
-        android:textSize="15sp" />
-
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center">
+        android:layout_marginLeft="30dp"
+        android:textSize="15sp"
+        android:layout_alignParentLeft="true"
+        android:layout_centerInParent="true" />
 
         <Spinner
             android:layout_width="wrap_content"
@@ -36,8 +34,13 @@
             android:id="@+id/daysSpinner"
             android:spinnerMode="dropdown"
             android:layout_gravity="center"
-            android:gravity="center" />
-    </LinearLayout>
+            android:gravity="center"
+            android:layout_alignParentTop="false"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_alignRight="@+id/settingsTextView"
+            android:layout_alignEnd="@+id/settingsTextView"
+            android:layout_marginLeft="20dp" />
 
     <ImageButton
         android:contentDescription="@android:string/yes"
@@ -45,6 +48,8 @@
         android:layout_height="wrap_content"
         android:id="@+id/btnStar"
         android:background="@android:drawable/btn_star_big_off"
-        android:layout_gravity="center_vertical" />
+        android:layout_alignParentRight="true"
+        android:layout_centerInParent="true"
+        android:layout_marginRight="10dp" />
 
-</LinearLayout>
+</RelativeLayout>

@@ -1,13 +1,13 @@
 package org.ssutt.android.activity;
 
-import android.app.ActionBar;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -27,8 +27,9 @@ import org.ssutt.android.domain.Department;
 
 import static org.ssutt.android.api.ApiConnector.isInternetAvailable;
 
-public class DepartmentActivity extends Activity {
+public class DepartmentActivity extends ActionBarActivity {
     private static final String DEPARTMENT = "department";
+    private static final String DEPARTMENT_FULL_NAME = "department_full_name";
     private static final String GROUP = "group";
 
     private ListView departmentListView;
@@ -42,8 +43,8 @@ public class DepartmentActivity extends Activity {
         setContentView(R.layout.department_view);
         context = this;
 
-        SharedPreferences sharedPreferences = getSharedPreferences("pref", MODE_PRIVATE);
-        final boolean firstTime = sharedPreferences.getBoolean("firstTime", true);
+        SharedPreferences pref = getSharedPreferences("pref", MODE_PRIVATE);
+        final boolean firstTime = pref.getBoolean("firstTime", true);
         boolean forSearch = getIntent().getBooleanExtra("forSearch", false);
 
         if (firstTime) {
@@ -53,19 +54,21 @@ public class DepartmentActivity extends Activity {
                     .setPositiveButton("Далее", null)
                     .show();
         } else if (!forSearch) {
-            String department = sharedPreferences.getString("myDepartment", "");
-            String group = sharedPreferences.getString("myGroup", "");
+            String department = pref.getString("myDepartment", "");
+            String group = pref.getString("myGroup", "");
+            String departmentFullName = pref.getString("myDepartmentFullName", "");
 
             Intent intent = new Intent(context, ScheduleActivity.class);
             intent.putExtra(DEPARTMENT, department);
             intent.putExtra(GROUP, group);
+            intent.putExtra(DEPARTMENT_FULL_NAME, departmentFullName);
 
             startActivity(intent);
             DepartmentActivity.this.finish();
         }
 
 
-        ActionBar actionBar = getActionBar();
+        ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayShowHomeEnabled(false);
         actionBar.setTitle(getString(R.string.chooseDepartment));
 
@@ -105,8 +108,8 @@ public class DepartmentActivity extends Activity {
             DepartmentTask departmentTask = new DepartmentTask();
             departmentTask.execute(departmentsRequest);
         } else {
-            sharedPreferences = getSharedPreferences("cacheDepartments", MODE_PRIVATE);
-            String json = sharedPreferences.getString(departmentsRequest, "isEmpty");
+            pref = getSharedPreferences("cacheDepartments", MODE_PRIVATE);
+            String json = pref.getString(departmentsRequest, "isEmpty");
             if (!json.equals("isEmpty")) {
                 updateUI(json);
             }
