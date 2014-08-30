@@ -12,13 +12,21 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import org.ssutt.android.R;
-import org.ssutt.android.domain.Department;
 
 import java.util.Arrays;
 import java.util.Map;
 
+import static org.ssutt.android.activity.Constants.FIRST_TIME;
+import static org.ssutt.android.activity.Constants.MY_DEPARTMENT;
+import static org.ssutt.android.activity.Constants.MY_GROUP;
+import static org.ssutt.android.activity.Constants.PREF;
+import static org.ssutt.android.activity.Constants.STAR;
+
 public class SettingsActivity extends ActionBarActivity {
-    private static final String[] settingsItems = new String[]{"Сменить мою группу", "Очистить сохраненные группы", ""};
+    private final String[] settingsItems = new String[]{
+            getString(R.string.changeMyGroup),
+            getString(R.string.cleanStaredGroups),
+            ""};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,12 +40,11 @@ public class SettingsActivity extends ActionBarActivity {
         ListView settingsListView = (ListView) findViewById(R.id.settingsListView);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, settingsItems);
         settingsListView.setAdapter(adapter);
-
         settingsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                SharedPreferences pref = getSharedPreferences("pref", MODE_PRIVATE);
-                SharedPreferences staredPref = getSharedPreferences("star", MODE_PRIVATE);
+                SharedPreferences pref = getSharedPreferences(PREF, MODE_PRIVATE);
+                SharedPreferences staredPref = getSharedPreferences(STAR, MODE_PRIVATE);
 
                 SharedPreferences.Editor editor = pref.edit();
                 SharedPreferences.Editor starEditor = staredPref.edit();
@@ -45,17 +52,15 @@ public class SettingsActivity extends ActionBarActivity {
                 switch (position) {
                     case 0:
                         Intent intent = new Intent(getApplicationContext(), DepartmentActivity.class);
-                        editor.putBoolean("firstTime", true);
+                        editor.putBoolean(FIRST_TIME, true);
                         editor.apply();
 
                         startActivity(intent);
                         break;
                     case 1:
                         Map<String, ?> stringMap = staredPref.getAll();
-                        String myDepartment = pref.getString("myDepartment", "empty");
-                        String myGroup = pref.getString("myGroup", "empty");
-
-                        System.out.println("!!! " + myDepartment + " " + myGroup);
+                        String myDepartment = pref.getString(MY_DEPARTMENT, "empty");
+                        String myGroup = pref.getString(MY_GROUP, "empty");
 
                         for (Map.Entry<String, ?> entry : stringMap.entrySet()) {
                             String key = entry.getKey();
@@ -63,13 +68,14 @@ public class SettingsActivity extends ActionBarActivity {
 
                             System.out.println(Arrays.toString(split));
 
-                            if (!split[0].equals(myDepartment) && !split[1].equals(myGroup)) {
+                            if (!(split[0].equals(myDepartment) && split[1].equals(myGroup))) {
                                 starEditor.putBoolean(key, false);
                             }
                         }
 
                         starEditor.apply();
                         Toast.makeText(getApplicationContext(), getString(R.string.staredGroupsRemoved), Toast.LENGTH_SHORT).show();
+
                         break;
                 }
             }

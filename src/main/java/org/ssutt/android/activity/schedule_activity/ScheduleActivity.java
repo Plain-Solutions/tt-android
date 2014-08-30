@@ -49,12 +49,19 @@ import java.util.List;
 
 import info.hoang8f.android.segmented.SegmentedGroup;
 
+import static org.ssutt.android.activity.Constants.CACHED_MSG;
+import static org.ssutt.android.activity.Constants.DEPARTMENT;
+import static org.ssutt.android.activity.Constants.DEPARTMENT_FULL_NAME;
+import static org.ssutt.android.activity.Constants.FOR_SEARCH;
+import static org.ssutt.android.activity.Constants.GROUP;
+import static org.ssutt.android.activity.Constants.MY_DEPARTMENT;
+import static org.ssutt.android.activity.Constants.MY_DEPARTMENT_FULL_NAME;
+import static org.ssutt.android.activity.Constants.MY_GROUP;
+import static org.ssutt.android.activity.Constants.PREF;
+import static org.ssutt.android.activity.Constants.STAR;
 import static org.ssutt.android.api.ApiConnector.isInternetAvailable;
 
 public class ScheduleActivity extends ActionBarActivity {
-    private static final String DEPARTMENT = "department";
-    private static final String DEPARTMENT_FULL_NAME = "department_full_name";
-    private static final String GROUP = "group";
     private String department;
     private String departmentFullName;
     private String group;
@@ -121,7 +128,6 @@ public class ScheduleActivity extends ActionBarActivity {
 
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
-
             }
         });
 
@@ -129,7 +135,7 @@ public class ScheduleActivity extends ActionBarActivity {
 
         final SegmentedGroup segmentedGroup = (SegmentedGroup) findViewById(R.id.segmentGroup);
         segmentedGroup.check(R.id.btnNumerator);
-        SharedPreferences preferences = getSharedPreferences("pref", MODE_PRIVATE);
+        SharedPreferences preferences = getSharedPreferences(PREF, MODE_PRIVATE);
         final SharedPreferences.Editor editor = preferences.edit();
 
         editor.putBoolean("btnNumerator", true);
@@ -148,7 +154,7 @@ public class ScheduleActivity extends ActionBarActivity {
                 AbstractTab item = (AbstractTab) pagerAdapter.getCurrentFragment();
                 item.refreshSchedule(getApplicationContext(), dayType, department, group);
 
-                SharedPreferences pref = getSharedPreferences("pref", MODE_PRIVATE);
+                SharedPreferences pref = getSharedPreferences(PREF, MODE_PRIVATE);
                 SharedPreferences.Editor editor = pref.edit();
                 editor.putBoolean("btnNumerator", checkedId == R.id.btnNumerator);
                 editor.apply();
@@ -185,9 +191,9 @@ public class ScheduleActivity extends ActionBarActivity {
 
                         String department = extras.getString(DEPARTMENT);
                         String group = extras.getString(GROUP);
-                        String myDepartment = pref.getString("myDepartment", "empty");
-                        String myGroup = pref.getString("myGroup", "empty");
-                        String myDepartmentFullName = pref.getString("myDepartmentFullName", "empty");
+                        String myDepartment = pref.getString(MY_DEPARTMENT, "empty");
+                        String myGroup = pref.getString(MY_GROUP, "empty");
+                        String myDepartmentFullName = pref.getString(MY_DEPARTMENT_FULL_NAME, "empty");
 
                         if (department.equals(myDepartment) && group.equals(myGroup)) {
                             break;
@@ -208,25 +214,25 @@ public class ScheduleActivity extends ActionBarActivity {
                             DepartmentMessageTask departmentMessageTask = new DepartmentMessageTask();
                             departmentMessageTask.execute(request);
                         } else {
-                            SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("cachedMsg", MODE_PRIVATE);
-                            String json = sharedPreferences.getString(request, "Department information not found!");
+                            SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(CACHED_MSG, MODE_PRIVATE);
+                            String json = sharedPreferences.getString(request, "{\"msg\":\"" + getString(R.string.departmentInfoNotFound) + "\"}");
                             updateUI(json);
                         }
                         break;
 
                     case 2:
-                        pref = getApplicationContext().getSharedPreferences("pref", MODE_PRIVATE);
-                        myDepartment = pref.getString("myDepartment", "empty");
-                        myGroup = pref.getString("myGroup", "empty");
+                        pref = getApplicationContext().getSharedPreferences(PREF, MODE_PRIVATE);
+                        myDepartment = pref.getString(MY_DEPARTMENT, "empty");
+                        myGroup = pref.getString(MY_GROUP, "empty");
 
                         intent = new Intent(getApplicationContext(), StaredGroupsActivity.class);
-                        intent.putExtra("myDepartment", myDepartment);
-                        intent.putExtra("myGroup", myGroup);
+                        intent.putExtra(MY_DEPARTMENT, myDepartment);
+                        intent.putExtra(MY_GROUP, myGroup);
                         startActivity(intent);
                         break;
                     case 3:
                         intent = new Intent(getApplicationContext(), DepartmentActivity.class);
-                        intent.putExtra("forSearch", true);
+                        intent.putExtra(FOR_SEARCH, true);
                         startActivity(intent);
                         break;
                     case 4:
@@ -275,11 +281,9 @@ public class ScheduleActivity extends ActionBarActivity {
             }
         });
 
-        final SharedPreferences starGroups = getApplicationContext().getSharedPreferences("star", MODE_PRIVATE);
+        final SharedPreferences starGroups = getApplicationContext().getSharedPreferences(STAR, MODE_PRIVATE);
         String tag = department + "&" + group + "&" + departmentFullName;
-        final boolean isStared = starGroups.getBoolean(tag, false);
-
-        System.out.println(tag + " " + isStared);
+        boolean isStared = starGroups.getBoolean(tag, false);
 
         if (isStared) {
             btnStar.setBackgroundResource(android.R.drawable.star_big_on);
@@ -290,16 +294,16 @@ public class ScheduleActivity extends ActionBarActivity {
         btnStar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SharedPreferences pref = getSharedPreferences("pref", MODE_PRIVATE);
-                String myDepartment = pref.getString("myDepartment", "empty");
-                String myGroup = pref.getString("myGroup", "empty");
+                SharedPreferences pref = getSharedPreferences(PREF, MODE_PRIVATE);
+                String myDepartment = pref.getString(MY_DEPARTMENT, "empty");
+                String myGroup = pref.getString(MY_GROUP, "empty");
 
                 SharedPreferences.Editor editor = starGroups.edit();
                 String tag = department + "&" + group + "&" + departmentFullName;
                 boolean curIsStared = starGroups.getBoolean(tag, false);
 
                 if (curIsStared) {
-                    if(!myDepartment.equals(department) && !myGroup.equals(group)){
+                    if (!(myDepartment.equals(department) && myGroup.equals(group))) {
                         editor.putBoolean(tag, false);
                         btnStar.setBackgroundResource(android.R.drawable.star_big_off);
                     } else {
@@ -321,18 +325,21 @@ public class ScheduleActivity extends ActionBarActivity {
         JsonObject jsonObject = jsonElement.getAsJsonObject();
 
         Message message = gsonBuilder.create().fromJson(jsonObject, Message.class);
+        if (message.getMessage().equals("")) {
+            message.setMessage(getString(R.string.emptyDepartmentInfo));
+        }
 
         new AlertDialog.Builder(this)
-                .setTitle("Department information:")
+                .setTitle(getString(R.string.departmentInfoTitle))
                 .setMessage(message.getMessage())
-                .setPositiveButton("ok", null)
+                .setPositiveButton(getString(R.string.close), null)
                 .show();
     }
 
     class DepartmentMessageTask extends ApiConnector {
         @Override
         protected void onPostExecute(String json) {
-            SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("cachedMsg", MODE_PRIVATE);
+            SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(CACHED_MSG, MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putString(getUrl(), json);
             editor.apply();

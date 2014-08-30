@@ -1,7 +1,6 @@
 package org.ssutt.android.adapter;
 
 import android.content.Context;
-import android.test.RenamingDelegatingContext;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;

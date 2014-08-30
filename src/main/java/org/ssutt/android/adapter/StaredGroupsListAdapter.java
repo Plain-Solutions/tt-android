@@ -1,7 +1,6 @@
 package org.ssutt.android.adapter;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,9 +13,9 @@ import org.ssutt.android.R;
 import java.util.List;
 
 public class StaredGroupsListAdapter extends ArrayAdapter<String> {
-    private List<String> staredGroups;
     String myDepartment;
     String myGroup;
+    private List<String> staredGroups;
 
     public StaredGroupsListAdapter(Context context, List<String> staredGroups, String myDepartment, String myGroup) {
         super(context, R.layout.stared_groups_list_item, staredGroups);
@@ -48,7 +47,7 @@ public class StaredGroupsListAdapter extends ArrayAdapter<String> {
         departmentTextView.setText(department);
         groupTextView.setText(group);
 
-        if(staredGroups.get(3 * position + 2).equals(myDepartment) && group.equals(myGroup)) {
+        if (staredGroups.get(3 * position + 2).equals(myDepartment) && group.equals(myGroup)) {
             departmentTextView.setTypeface(Typeface.DEFAULT_BOLD);
             groupTextView.setTypeface(Typeface.DEFAULT_BOLD);
         }

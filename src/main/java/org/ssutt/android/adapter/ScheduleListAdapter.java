@@ -75,7 +75,7 @@ public class ScheduleListAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         switch (getItemViewType(position)) {
             case TYPE_ITEM:
-                if(convertView == null) {
+                if (convertView == null) {
                     convertView = inflater.inflate(R.layout.schedule_view_list_item, null);
                 }
 
@@ -113,7 +113,7 @@ public class ScheduleListAdapter extends BaseAdapter {
                 break;
 
             case TYPE_SEPARATOR:
-                if(convertView == null) {
+                if (convertView == null) {
                     convertView = inflater.inflate(R.layout.schedule_view_list_header, null);
                 }
 

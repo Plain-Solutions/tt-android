@@ -34,6 +34,10 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import static android.content.Context.MODE_PRIVATE;
+import static org.ssutt.android.activity.Constants.CACHED_SCHEDULE;
+import static org.ssutt.android.activity.Constants.DEPARTMENT;
+import static org.ssutt.android.activity.Constants.GROUP;
+import static org.ssutt.android.activity.Constants.PREF;
 import static org.ssutt.android.activity.schedule_activity.tabs.DayType.DENOMINATOR;
 import static org.ssutt.android.activity.schedule_activity.tabs.DayType.FULL;
 import static org.ssutt.android.activity.schedule_activity.tabs.DayType.NUMERATOR;
@@ -42,8 +46,6 @@ import static org.ssutt.android.api.ApiConnector.isInternetAvailable;
 
 public abstract class AbstractTab extends Fragment {
     private static final String[] times = {"08:20 - 09:50", "10:00 - 11:35", "12:05 - 13:40", "13:50 - 15:25", "15:35 - 17:10", "17:20 - 18:40", "18:45 - 20:05", "20:10 - 21:30"};
-    private static final String DEPARTMENT = "department";
-    private static final String GROUP = "group";
     private static final String SUBJECT_DETAILS = "subject_details";
     private static String department;
     private static String group;
@@ -103,7 +105,7 @@ public abstract class AbstractTab extends Fragment {
 
     public void refreshSchedule(String department, String group) {
         DayType dayType;
-        SharedPreferences preferences = context.getSharedPreferences("pref", MODE_PRIVATE);
+        SharedPreferences preferences = context.getSharedPreferences(PREF, MODE_PRIVATE);
         if (preferences.getBoolean("btnNumerator", false)) {
             dayType = NUMERATOR;
         } else {
@@ -115,7 +117,7 @@ public abstract class AbstractTab extends Fragment {
             ScheduleTask scheduleTask = new ScheduleTask(dayType);
             scheduleTask.execute(scheduleRequest);
         } else {
-            SharedPreferences sharedPreferences = context.getSharedPreferences("cacheSchedule", MODE_PRIVATE);
+            SharedPreferences sharedPreferences = context.getSharedPreferences(CACHED_SCHEDULE, MODE_PRIVATE);
             String json = sharedPreferences.getString(scheduleRequest, "isEmpty");
             if (!json.equals("isEmpty")) {
                 updateUI(dayType, json);
@@ -131,7 +133,7 @@ public abstract class AbstractTab extends Fragment {
             ScheduleTask scheduleTask = new ScheduleTask(dayType);
             scheduleTask.execute(scheduleRequest);
         } else {
-            SharedPreferences sharedPreferences = context.getSharedPreferences("cacheSchedule", MODE_PRIVATE);
+            SharedPreferences sharedPreferences = context.getSharedPreferences(CACHED_SCHEDULE, MODE_PRIVATE);
             String json = sharedPreferences.getString(scheduleRequest, "isEmpty");
             if (!json.equals("isEmpty")) {
                 updateUI(dayType, json);
@@ -198,7 +200,7 @@ public abstract class AbstractTab extends Fragment {
 
         lessonBySubject = new HashMap<Subject, Integer>();
         if (scheduleByDay.get(getDayOfWeek()) == null) {
-            scheduleListAdapter.addSectionHeaderItem("Пар нет!");
+            scheduleListAdapter.addSectionHeaderItem(context.getString(R.string.emptyDay));
         } else {
             int i = 0;
             for (Lesson lesson : scheduleByDay.get(getDayOfWeek())) {
@@ -238,7 +240,7 @@ public abstract class AbstractTab extends Fragment {
 
         @Override
         public void onPostExecute(String json) {
-            SharedPreferences sharedPreferences = context.getSharedPreferences("cacheSchedule", MODE_PRIVATE);
+            SharedPreferences sharedPreferences = context.getSharedPreferences(CACHED_SCHEDULE, MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putString(getUrl(), json);
             editor.apply();

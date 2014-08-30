@@ -1,55 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
+    android:orientation="horizontal"
     android:weightSum="1">
 
     <ImageButton
-        android:contentDescription="@android:string/yes"
+        android:id="@+id/btnNavigationDrawer"
         android:layout_width="20dp"
         android:layout_height="wrap_content"
-        android:id="@+id/btnNavigationDrawer"
-        android:background="@drawable/ic_navigation_drawer"
-        android:layout_gravity="center_vertical"
+        android:layout_alignParentLeft="true"
         android:layout_centerInParent="true"
-        android:layout_alignParentLeft="true" />
+        android:layout_gravity="center_vertical"
+        android:background="@drawable/ic_navigation_drawer"
+        android:contentDescription="@android:string/yes" />
 
     <TextView
+        android:id="@+id/settingsTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/app_name"
-        android:id="@+id/settingsTextView"
-        android:layout_gravity="center"
-        android:textColor="@android:color/white"
-        android:layout_marginLeft="30dp"
-        android:textSize="15sp"
         android:layout_alignParentLeft="true"
-        android:layout_centerInParent="true" />
+        android:layout_centerInParent="true"
+        android:layout_gravity="center"
+        android:layout_marginLeft="30dp"
+        android:text="@string/app_name"
+        android:textColor="@android:color/white"
+        android:textSize="15sp" />
 
-        <Spinner
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/daysSpinner"
-            android:spinnerMode="dropdown"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:layout_alignParentTop="false"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:layout_alignRight="@+id/settingsTextView"
-            android:layout_alignEnd="@+id/settingsTextView"
-            android:layout_marginLeft="20dp" />
+    <Spinner
+        android:id="@+id/daysSpinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignEnd="@+id/settingsTextView"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="false"
+        android:layout_alignRight="@+id/settingsTextView"
+        android:layout_centerVertical="true"
+        android:layout_gravity="center"
+        android:layout_marginLeft="20dp"
+        android:gravity="center"
+        android:spinnerMode="dropdown" />
 
     <ImageButton
-        android:contentDescription="@android:string/yes"
+        android:id="@+id/btnStar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/btnStar"
-        android:background="@android:drawable/btn_star_big_off"
         android:layout_alignParentRight="true"
         android:layout_centerInParent="true"
-        android:layout_marginRight="10dp" />
+        android:layout_marginRight="10dp"
+        android:background="@android:drawable/btn_star_big_off"
+        android:contentDescription="@android:string/yes" />
 
 </RelativeLayout>

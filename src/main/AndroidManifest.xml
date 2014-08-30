@@ -11,17 +11,29 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
 
-        <activity android:name=".activity.DepartmentActivity" android:configChanges="keyboardHidden|orientation|screenSize">
+        <activity
+            android:name=".activity.DepartmentActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.GroupActivity" android:configChanges="keyboardHidden|orientation|screenSize"/>
-        <activity android:name=".activity.schedule_activity.ScheduleActivity" android:configChanges="keyboardHidden|orientation|screenSize"/>
-        <activity android:name=".activity.SubjectDetailsActivity" android:configChanges="keyboardHidden|orientation|screenSize"/>
-        <activity android:name=".activity.StaredGroupsActivity" android:configChanges="keyboardHidden|orientation|screenSize"/>
-        <activity android:name=".activity.SettingsActivity" android:configChanges="keyboardHidden|orientation|screenSize"/>
+        <activity
+            android:name=".activity.GroupActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
+            android:name=".activity.schedule_activity.ScheduleActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
+            android:name=".activity.SubjectDetailsActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
+            android:name=".activity.StaredGroupsActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
+            android:name=".activity.SettingsActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
     </application>
 
 </manifest>

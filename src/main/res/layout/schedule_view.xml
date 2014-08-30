@@ -19,23 +19,23 @@
             android:id="@+id/segmentGroup"
             android:layout_width="match_parent"
             android:layout_height="58dp"
-            android:orientation="horizontal"
+            android:layout_margin="10dp"
             android:gravity="center|center_horizontal"
-            android:layout_margin="10dp">
+            android:orientation="horizontal">
 
             <RadioButton
                 android:id="@+id/btnNumerator"
-                android:layout_weight="1"
+                style="@style/RadioButton"
                 android:layout_height="40dp"
-                android:text="@string/numerator"
-                style="@style/RadioButton" />
+                android:layout_weight="1"
+                android:text="@string/numerator" />
 
             <RadioButton
                 android:id="@+id/btnDenominator"
-                android:layout_weight="1"
+                style="@style/RadioButton"
                 android:layout_height="40dp"
-                android:text="@string/denominator"
-                style="@style/RadioButton" />
+                android:layout_weight="1"
+                android:text="@string/denominator" />
         </info.hoang8f.android.segmented.SegmentedGroup>
     </LinearLayout>
 
@@ -44,9 +44,9 @@
         android:layout_width="240dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
+        android:background="#222222"
         android:choiceMode="singleChoice"
         android:divider="@android:color/transparent"
-        android:dividerHeight="0dp"
-        android:background="#222222" />
+        android:dividerHeight="0dp" />
 </android.support.v4.widget.DrawerLayout>
 

@@ -22,6 +22,24 @@ public abstract class ApiConnector extends AsyncTask<String, Integer, String> {
     private static final String cacheNoFoundMessage = "Данные в локальном хранилище не найдены.";
     private String url;
 
+    public static boolean isInternetAvailable(Context context) {
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+        return networkInfo != null && networkInfo.isConnectedOrConnecting();
+    }
+
+    public static void errorToast(Context context) {
+        Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show();
+    }
+
+    public static void cacheToast(Context context) {
+        Toast.makeText(context, cacheMessage, Toast.LENGTH_SHORT).show();
+    }
+
+    public static void cacheNoFoundToast(Context context) {
+        Toast.makeText(context, cacheNoFoundMessage, Toast.LENGTH_SHORT).show();
+    }
+
     public String getUrl() {
         return url;
     }
@@ -67,23 +85,5 @@ public abstract class ApiConnector extends AsyncTask<String, Integer, String> {
         }
 
         return null;
-    }
-
-    public static boolean isInternetAvailable(Context context) {
-        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-        return networkInfo != null && networkInfo.isConnectedOrConnecting();
-    }
-
-    public static void errorToast(Context context) {
-        Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show();
-    }
-
-    public static void cacheToast(Context context) {
-        Toast.makeText(context, cacheMessage, Toast.LENGTH_SHORT).show();
-    }
-
-    public static void cacheNoFoundToast(Context context) {
-        Toast.makeText(context, cacheNoFoundMessage, Toast.LENGTH_SHORT).show();
     }
 }

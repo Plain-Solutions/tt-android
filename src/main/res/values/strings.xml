@@ -25,6 +25,16 @@
     <string name="settings">Настройки:</string>
     <string name="staredGroupsRemoved">Список сохраненных групп очищен!</string>
     <string name="unstarMyGroup">Нельзя удалить свою группу из избранного. Для этого смените свою группу в настройках.</string>
+    <string name="departmentInfoNotFound">Информация для факультета недоступна</string>
+    <string name="departmentInfoTitle">Информация:</string>
+    <string name="close">закрыть</string>
+    <string name="emptyDepartmentInfo">Инфы нет )</string>
+    <string name="welcomeTitle">Добро пожаловать!</string>
+    <string name="welcomeText">Выберите Ваш факультет и группу!</string>
+    <string name="welcomeClose">Далее</string>
+    <string name="emptyDay">Пар нет!</string>
+    <string name="changeMyGroup">Сменить мою группу</string>
+    <string name="cleanStaredGroups">Очистить сохраненные группы</string>
 
     <color name="red">#ff5e3a</color>
     <color name="green">#4cd964</color>

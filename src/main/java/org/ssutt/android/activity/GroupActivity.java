@@ -1,6 +1,5 @@
 package org.ssutt.android.activity;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -26,14 +25,20 @@ import org.ssutt.android.deserializer.GroupDeserializer;
 import org.ssutt.android.domain.Department;
 import org.ssutt.android.domain.Group;
 
+import static org.ssutt.android.activity.Constants.CACHED_GROUPS;
+import static org.ssutt.android.activity.Constants.DEPARTMENT;
+import static org.ssutt.android.activity.Constants.DEPARTMENT_FULL_NAME;
+import static org.ssutt.android.activity.Constants.FIRST_TIME;
+import static org.ssutt.android.activity.Constants.GROUP;
+import static org.ssutt.android.activity.Constants.MY_DEPARTMENT;
+import static org.ssutt.android.activity.Constants.MY_DEPARTMENT_FULL_NAME;
+import static org.ssutt.android.activity.Constants.MY_GROUP;
+import static org.ssutt.android.activity.Constants.PREF;
+import static org.ssutt.android.activity.Constants.STAR;
 import static org.ssutt.android.api.ApiConnector.isInternetAvailable;
 import static org.ssutt.android.api.ApiRequests.getGroups;
 
 public class GroupActivity extends ActionBarActivity {
-    private static final String DEPARTMENT = "department";
-    private static final String DEPARTMENT_FULL_NAME = "department_full_name";
-    private static final String GROUP = "group";
-
     private SwipeRefreshLayout swipeLayout;
     private String[] groupNames;
     private ListView groupListView;
@@ -55,19 +60,19 @@ public class GroupActivity extends ActionBarActivity {
         groupListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                SharedPreferences pref = getSharedPreferences("pref", MODE_PRIVATE);
-                SharedPreferences staredPref = getSharedPreferences("star", MODE_PRIVATE);
+                SharedPreferences pref = getSharedPreferences(PREF, MODE_PRIVATE);
+                SharedPreferences staredPref = getSharedPreferences(STAR, MODE_PRIVATE);
 
-                boolean firstTime = pref.getBoolean("firstTime", true);
+                boolean firstTime = pref.getBoolean(FIRST_TIME, true);
 
                 if (firstTime) {
                     SharedPreferences.Editor editor = pref.edit();
                     SharedPreferences.Editor staredEditor = staredPref.edit();
 
-                    editor.putString("myDepartment", department.getTag());
-                    editor.putString("myGroup", groupNames[position]);
-                    editor.putString("myDepartmentFullName", department.getName());
-                    editor.putBoolean("firstTime", false);
+                    editor.putString(MY_DEPARTMENT, department.getTag());
+                    editor.putString(MY_GROUP, groupNames[position]);
+                    editor.putString(MY_DEPARTMENT_FULL_NAME, department.getName());
+                    editor.putBoolean(FIRST_TIME, false);
                     editor.apply();
 
                     String tag = department.getTag() + "&" + groupNames[position] + "&" + department.getName();
@@ -83,6 +88,7 @@ public class GroupActivity extends ActionBarActivity {
 
                 if (firstTime) {
                     GroupActivity.this.finish();
+                    DepartmentActivity.getInstance().finish();
                 }
             }
         });
@@ -109,7 +115,7 @@ public class GroupActivity extends ActionBarActivity {
             GroupTask scheduleTask = new GroupTask();
             scheduleTask.execute(groupsRequest);
         } else {
-            SharedPreferences sharedPreferences = getSharedPreferences("cacheGroups", MODE_PRIVATE);
+            SharedPreferences sharedPreferences = getSharedPreferences(CACHED_GROUPS, MODE_PRIVATE);
             String json = sharedPreferences.getString(groupsRequest, "isEmpty");
             if (!json.equals("isEmpty")) {
                 updateUI(json);
@@ -147,7 +153,7 @@ public class GroupActivity extends ActionBarActivity {
 
         @Override
         protected void onPostExecute(String json) {
-            SharedPreferences sharedPreferences = getSharedPreferences("cacheGroups", MODE_PRIVATE);
+            SharedPreferences sharedPreferences = getSharedPreferences(CACHED_GROUPS, MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putString(getUrl(), json);
             editor.apply();
