@@ -11,8 +11,7 @@
         android:layout_width="20dp"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_centerInParent="true"
-        android:layout_gravity="center_vertical"
+        android:layout_centerVertical="true"
         android:background="@drawable/ic_navigation_drawer"
         android:contentDescription="@android:string/yes" />
 
@@ -21,12 +20,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_centerInParent="true"
-        android:layout_gravity="center"
+        android:layout_centerVertical="true"
         android:layout_marginLeft="30dp"
         android:text="@string/app_name"
         android:textColor="@android:color/white"
-        android:textSize="15sp"/>
+        android:textSize="15sp" />
 
     <Spinner
         android:id="@+id/daysSpinner"
@@ -46,8 +44,8 @@
         android:id="@+id/btnStar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
         android:layout_alignParentRight="true"
-        android:layout_centerInParent="true"
         android:layout_marginRight="10dp"
         android:background="@android:drawable/btn_star_big_off"
         android:contentDescription="@android:string/yes" />

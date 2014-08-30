@@ -8,12 +8,6 @@ public class Subgroup {
     public Subgroup() {
     }
 
-    public Subgroup(String subgroup, String teacher, String location) {
-        this.subgroup = subgroup;
-        this.teacher = teacher;
-        this.location = location;
-    }
-
     public String getSubgroup() {
         return subgroup;
     }

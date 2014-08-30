@@ -21,9 +21,6 @@ public class Department implements Serializable {
     private String name;
     private String tag;
 
-    public Department() {
-    }
-
     public Department(String tag, String name) {
         this.tag = tag;
         this.name = name;

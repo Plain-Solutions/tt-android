@@ -2,6 +2,7 @@ package org.ssutt.android.activity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -33,10 +34,12 @@ public class StaredGroupsActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.stared_groups_view);
 
-        int actionBarTitleid = getResources().getIdentifier("action_bar_title", "id", "android");
-        TextView actionBarTitle = (TextView) findViewById(actionBarTitleid);
-        actionBarTitle.setTypeface(Typefaces.get(this, "fonts/helvetica-bold"));
-        
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            int actionBarTitleid = getResources().getIdentifier("action_bar_title", "id", "android");
+            TextView actionBarTitle = (TextView) findViewById(actionBarTitleid);
+            actionBarTitle.setTypeface(Typefaces.get(this, "fonts/helvetica-bold"));
+        }
+
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayShowHomeEnabled(false);
         actionBar.setTitle(getString(R.string.staredGroups));

@@ -26,8 +26,6 @@ public class SpinnerDayAdapter extends ArrayAdapter {
         TextView label = (TextView) view.findViewById(R.id.daysSpinnerItem);
         label.setText(data[position]);
         label.setTypeface(Typefaces.get(getContext(), "fonts/helvetica-light.otf"));
-
-        System.out.println("RETURNING VIEW: " + label.getText());
         return view;
     }
 
@@ -39,8 +37,6 @@ public class SpinnerDayAdapter extends ArrayAdapter {
         TextView label = (TextView) view.findViewById(android.R.id.text1);
         label.setText(data[position]);
         label.setTypeface(Typefaces.get(getContext(), "fonts/helvetica-light.otf"));
-
-        System.out.println("RETURNING DROPDOWN: " + label.getText());
         return view;
     }
 

@@ -3,6 +3,7 @@ package org.ssutt.android.activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
@@ -27,6 +28,7 @@ import org.ssutt.android.deserializer.GroupDeserializer;
 import org.ssutt.android.domain.Department;
 import org.ssutt.android.domain.Group;
 
+import static android.os.Build.VERSION_CODES.GINGERBREAD;
 import static org.ssutt.android.activity.Constants.CACHED_GROUPS;
 import static org.ssutt.android.activity.Constants.DEPARTMENT;
 import static org.ssutt.android.activity.Constants.DEPARTMENT_FULL_NAME;
@@ -54,9 +56,11 @@ public class GroupActivity extends ActionBarActivity {
         swipeLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_container);
         context = this;
 
-        int actionBarTitleid = getResources().getIdentifier("action_bar_title", "id", "android");
-        TextView actionBarTitle = (TextView) findViewById(actionBarTitleid);
-        actionBarTitle.setTypeface(Typefaces.get(this, "fonts/helvetica-bold"));
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            int actionBarTitleid = getResources().getIdentifier("action_bar_title", "id", "android");
+            TextView actionBarTitle = (TextView) findViewById(actionBarTitleid);
+            actionBarTitle.setTypeface(Typefaces.get(this, "fonts/helvetica-bold"));
+        }
 
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayShowHomeEnabled(false);

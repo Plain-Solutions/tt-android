@@ -31,7 +31,7 @@
     <string name="close">Close</string>
     <string name="emptyDepartmentInfo">No info )</string>
     <string name="welcomeTitle">Welcome!</string>
-    <string name="welcomeText">Choose your department and group:</string>
+    <string name="welcomeText">Choose your department and group!</string>
     <string name="welcomeClose">Next</string>
     <string name="emptyDay">No lessons!</string>
     <string name="changeMyGroup">Change my group</string>

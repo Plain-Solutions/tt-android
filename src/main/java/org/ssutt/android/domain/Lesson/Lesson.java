@@ -25,12 +25,6 @@ public class Lesson {
     public Lesson() {
     }
 
-    public Lesson(int day, int sequence, List<Subject> subject) {
-        this.day = day;
-        this.sequence = sequence;
-        this.subject = subject;
-    }
-
     public int getDay() {
         return day;
     }

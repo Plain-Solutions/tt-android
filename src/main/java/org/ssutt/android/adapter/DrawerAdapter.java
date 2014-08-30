@@ -12,6 +12,7 @@ import org.ssutt.android.R;
 import org.ssutt.android.Typefaces;
 
 public class DrawerAdapter extends BaseAdapter {
+    private static final int[] iconResourcesId = {R.drawable.ic_home, R.drawable.ic_info, R.drawable.ic_star, R.drawable.ic_search, R.drawable.ic_settings};
     private LayoutInflater inflater;
     private Context context;
     private String[] data;
@@ -48,23 +49,7 @@ public class DrawerAdapter extends BaseAdapter {
 
         settingsText.setText(data[i]);
         settingsText.setTypeface(Typefaces.get(context, "fonts/helvetica-light.otf"));
-        switch (i) {
-            case 0:
-                icon.setBackgroundResource(R.drawable.ic_home);
-                break;
-            case 1:
-                icon.setBackgroundResource(R.drawable.ic_info);
-                break;
-            case 2:
-                icon.setBackgroundResource(R.drawable.ic_star);
-                break;
-            case 3:
-                icon.setBackgroundResource(R.drawable.ic_search);
-                break;
-            case 4:
-                icon.setBackgroundResource(R.drawable.ic_settings);
-                break;
-        }
+        icon.setBackgroundResource(iconResourcesId[i]);
 
         return convertView;
     }
