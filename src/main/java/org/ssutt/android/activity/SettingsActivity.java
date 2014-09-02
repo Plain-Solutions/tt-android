@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import org.ssutt.android.R;
 import org.ssutt.android.Typefaces;
+import org.ssutt.android.activity.schedule_activity.ScheduleActivity;
 import org.ssutt.android.adapter.SettingsAdapter;
 
 import java.util.Arrays;
@@ -65,6 +66,7 @@ public class SettingsActivity extends ActionBarActivity {
                         editor.apply();
 
                         startActivity(intent);
+                        SettingsActivity.this.finish();
                         break;
                     case 1:
                         Map<String, ?> stringMap = staredPref.getAll();

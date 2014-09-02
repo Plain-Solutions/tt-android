@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -28,7 +29,6 @@ import org.ssutt.android.deserializer.GroupDeserializer;
 import org.ssutt.android.domain.Department;
 import org.ssutt.android.domain.Group;
 
-import static android.os.Build.VERSION_CODES.GINGERBREAD;
 import static org.ssutt.android.activity.Constants.CACHED_GROUPS;
 import static org.ssutt.android.activity.Constants.DEPARTMENT;
 import static org.ssutt.android.activity.Constants.DEPARTMENT_FULL_NAME;
@@ -43,10 +43,16 @@ import static org.ssutt.android.api.ApiConnector.isInternetAvailable;
 import static org.ssutt.android.api.ApiRequests.getGroups;
 
 public class GroupActivity extends ActionBarActivity {
+    private static GroupActivity instance;
     private SwipeRefreshLayout swipeLayout;
     private String[] groupNames;
     private ListView groupListView;
     private Context context;
+    private Department department;
+
+    public static GroupActivity getInstance() {
+        return instance;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,8 +61,9 @@ public class GroupActivity extends ActionBarActivity {
         groupListView = (ListView) findViewById(R.id.groupListView);
         swipeLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_container);
         context = this;
+        instance = this;
 
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             int actionBarTitleid = getResources().getIdentifier("action_bar_title", "id", "android");
             TextView actionBarTitle = (TextView) findViewById(actionBarTitleid);
             actionBarTitle.setTypeface(Typefaces.get(this, "fonts/helvetica-bold"));
@@ -66,7 +73,7 @@ public class GroupActivity extends ActionBarActivity {
         actionBar.setDisplayShowHomeEnabled(false);
         actionBar.setTitle(getString(R.string.chooseGroup));
 
-        final Department department = (Department) getIntent().getSerializableExtra(DEPARTMENT);
+        department = (Department) getIntent().getSerializableExtra(DEPARTMENT);
         groupListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -94,42 +101,61 @@ public class GroupActivity extends ActionBarActivity {
                 intent.putExtra(DEPARTMENT, department.getTag());
                 intent.putExtra(DEPARTMENT_FULL_NAME, department.getName());
                 intent.putExtra(GROUP, groupNames[position]);
-                startActivity(intent);
 
-                if (firstTime) {
-                    GroupActivity.this.finish();
+
+                if(ScheduleActivity.getInstance() != null) {
+                    ScheduleActivity.getInstance().finish();
+                }
+                if(DepartmentActivity.getInstance() != null) {
                     DepartmentActivity.getInstance().finish();
                 }
+                GroupActivity.this.finish();
+
+                startActivity(intent);
             }
         });
 
-        final String groupsRequest = getGroups(department.getTag(), GroupMode.ONLY_FILLED);
         swipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                if (isInternetAvailable(context)) {
-                    GroupTask scheduleTask = new GroupTask();
-                    scheduleTask.execute(groupsRequest);
-                } else {
-                    swipeLayout.setRefreshing(false);
-                }
+                refreshGroups();
             }
         });
-
         swipeLayout.setColorScheme(android.R.color.holo_blue_bright,
                 android.R.color.holo_green_light,
                 android.R.color.holo_orange_light,
                 android.R.color.holo_red_light);
 
+        refreshGroups();
+    }
+
+    private void refreshGroups() {
+        final String groupsRequest = getGroups(department.getTag(), GroupMode.ALL);
+        SharedPreferences sharedPreferences = getSharedPreferences(CACHED_GROUPS, MODE_PRIVATE);
+        String cachedJson = sharedPreferences.getString(groupsRequest, "isEmpty");
+
+        if (!cachedJson.equals("isEmpty")) {
+            System.out.println("CACHED");
+            updateUI(cachedJson);
+        } else {
+            System.out.println("NOT CACHED");
+        }
+
         if (isInternetAvailable(context)) {
+            System.out.println("DOWNLOADING FROM INTERNET");
             GroupTask scheduleTask = new GroupTask();
             scheduleTask.execute(groupsRequest);
         } else {
-            SharedPreferences sharedPreferences = getSharedPreferences(CACHED_GROUPS, MODE_PRIVATE);
-            String json = sharedPreferences.getString(groupsRequest, "isEmpty");
-            if (!json.equals("isEmpty")) {
-                updateUI(json);
-            }
+            System.out.println("Internet is not available!");
+            swipeLayout.setRefreshing(false);
+        }
+    }
+
+    private void processGroups(Group[] groups) {
+        groupNames = new String[groups.length];
+        int i = 0;
+        for (Group group : groups) {
+            groupNames[i++] = group.getName();
         }
     }
 
@@ -144,14 +170,7 @@ public class GroupActivity extends ActionBarActivity {
 
         GroupListAdapter groupAdapter = new GroupListAdapter(context, groupNames);
         groupListView.setAdapter(groupAdapter);
-    }
-
-    private void processGroups(Group[] groups) {
-        groupNames = new String[groups.length];
-        int i = 0;
-        for (Group group : groups) {
-            groupNames[i++] = group.getName();
-        }
+        swipeLayout.setRefreshing(false);
     }
 
     private class GroupTask extends ApiConnector {
@@ -163,13 +182,26 @@ public class GroupActivity extends ActionBarActivity {
 
         @Override
         protected void onPostExecute(String json) {
+            if (!isValid(json)) {
+                Toast.makeText(context, ApiConnector.errorMessages.get(json), Toast.LENGTH_LONG).show();
+                swipeLayout.setRefreshing(false);
+                return;
+            }
+
+            cacheGroup(json);
+            updateUI(json);
+        }
+
+        private void cacheGroup(String json) {
             SharedPreferences sharedPreferences = getSharedPreferences(CACHED_GROUPS, MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putString(getUrl(), json);
             editor.apply();
+        }
 
-            updateUI(json);
-            swipeLayout.setRefreshing(false);
+        @Override
+        public Context getContext() {
+            return getApplicationContext();
         }
     }
 }

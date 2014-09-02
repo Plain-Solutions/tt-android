@@ -15,6 +15,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -40,6 +41,7 @@ import static org.ssutt.android.activity.Constants.MY_DEPARTMENT;
 import static org.ssutt.android.activity.Constants.MY_DEPARTMENT_FULL_NAME;
 import static org.ssutt.android.activity.Constants.MY_GROUP;
 import static org.ssutt.android.activity.Constants.PREF;
+import static org.ssutt.android.api.ApiConnector.*;
 import static org.ssutt.android.api.ApiConnector.isInternetAvailable;
 
 public class DepartmentActivity extends ActionBarActivity {
@@ -96,7 +98,7 @@ public class DepartmentActivity extends ActionBarActivity {
             DepartmentActivity.this.finish();
         }
 
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             int actionBarTitleid = getResources().getIdentifier("action_bar_title", "id", "android");
             TextView actionBarTitle = (TextView) findViewById(actionBarTitleid);
             actionBarTitle.setTypeface(Typefaces.get(this, "fonts/helvetica-bold"));
@@ -116,17 +118,12 @@ public class DepartmentActivity extends ActionBarActivity {
             }
         });
 
-        final String departmentsRequest = ApiRequests.getDepartments();
+
         swipeLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_container);
         swipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                if (isInternetAvailable(context)) {
-                    DepartmentTask scheduleTask = new DepartmentTask();
-                    scheduleTask.execute(departmentsRequest);
-                } else {
-                    swipeLayout.setRefreshing(false);
-                }
+                refreshDepartments();
             }
         });
 
@@ -135,29 +132,29 @@ public class DepartmentActivity extends ActionBarActivity {
                 android.R.color.holo_orange_light,
                 android.R.color.holo_red_light);
 
+        refreshDepartments();
+    }
+
+    private void refreshDepartments() {
+        String departmentsRequest = ApiRequests.getDepartments();
+        SharedPreferences pref = getSharedPreferences(CACHED_DEPARTMENTS, MODE_PRIVATE);
+        String cachedJson = pref.getString(departmentsRequest, "isEmpty");
+
+        if (!cachedJson.equals("isEmpty")) {
+            System.out.println("CACHED");
+            updateUI(cachedJson);
+        } else {
+            System.out.println("NOT CACHED");
+        }
+
         if (isInternetAvailable(context)) {
+            System.out.println("DOWNLOADING FROM INTERNET");
             DepartmentTask departmentTask = new DepartmentTask();
             departmentTask.execute(departmentsRequest);
         } else {
-            pref = getSharedPreferences(CACHED_DEPARTMENTS, MODE_PRIVATE);
-            String json = pref.getString(departmentsRequest, "isEmpty");
-            if (!json.equals("isEmpty")) {
-                updateUI(json);
-            }
+            System.out.println("Internet is not available!");
+            swipeLayout.setRefreshing(false);
         }
-    }
-
-    private void updateUI(String json) {
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(Department.class, new DepartmentDeserializer());
-        JsonElement jsonElement = new JsonParser().parse(json);
-        JsonArray asJsonArray = jsonElement.getAsJsonArray();
-
-        departments = gsonBuilder.create().fromJson(asJsonArray, Department[].class);
-        String[] departmentNames = processDepartments(departments);
-
-        DepartmentListAdapter adapter = new DepartmentListAdapter(context, departmentNames);
-        departmentListView.setAdapter(adapter);
     }
 
     private String[] processDepartments(Department... departments) {
@@ -177,6 +174,20 @@ public class DepartmentActivity extends ActionBarActivity {
         return departmentNames;
     }
 
+    private void updateUI(String json) {
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.registerTypeAdapter(Department.class, new DepartmentDeserializer());
+        JsonElement jsonElement = new JsonParser().parse(json);
+        JsonArray asJsonArray = jsonElement.getAsJsonArray();
+
+        departments = gsonBuilder.create().fromJson(asJsonArray, Department[].class);
+        String[] departmentNames = processDepartments(departments);
+
+        DepartmentListAdapter adapter = new DepartmentListAdapter(context, departmentNames);
+        departmentListView.setAdapter(adapter);
+        swipeLayout.setRefreshing(false);
+    }
+
     private class DepartmentTask extends ApiConnector {
         @Override
         protected void onPreExecute() {
@@ -185,13 +196,26 @@ public class DepartmentActivity extends ActionBarActivity {
 
         @Override
         public void onPostExecute(String json) {
+            if (!isValid(json)) {
+                Toast.makeText(context, errorMessages.get(json), Toast.LENGTH_LONG).show();
+                swipeLayout.setRefreshing(false);
+                return;
+            }
+
+            cacheDepartment(json);
+            updateUI(json);
+        }
+
+        private void cacheDepartment(String json) {
             SharedPreferences sharedPreferences = getSharedPreferences(CACHED_DEPARTMENTS, MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putString(getUrl(), json);
             editor.apply();
+        }
 
-            updateUI(json);
-            swipeLayout.setRefreshing(false);
+        @Override
+        public Context getContext() {
+            return getApplicationContext();
         }
     }
 }

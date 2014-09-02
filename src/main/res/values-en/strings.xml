@@ -37,6 +37,14 @@
     <string name="changeMyGroup">Change my group</string>
     <string name="cleanStaredGroups">Clear saved groups</string>
 
+    <string name="dbError">Database error! Please, contact with us!</string>
+    <string name="productionIsDown">Production server is down! Please, contact with us as soon as you can!</string>
+    <string name="noSuchDepartment">No such department!</string>
+    <string name="noSuchGroup">No such group!</string>
+    <string name="unsupportedEncoding">Unsupported encoding! Please, contact with us!</string>
+    <string name="timeout">Timeout!</string>
+    <string name="connectionRefused">Connection refused!</string>
+
     <color name="red">#ff5e3a</color>
     <color name="green">#4cd964</color>
     <color name="blue">#66cdfc</color>
