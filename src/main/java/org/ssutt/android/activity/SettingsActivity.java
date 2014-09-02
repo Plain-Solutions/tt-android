@@ -27,10 +27,17 @@ import static org.ssutt.android.activity.Constants.PREF;
 import static org.ssutt.android.activity.Constants.STAR;
 
 public class SettingsActivity extends ActionBarActivity {
+    private static SettingsActivity instance;
+
+    public static SettingsActivity getInstance() {
+        return instance;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.settings_view);
+        instance = this;
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             int actionBarTitleid = getResources().getIdentifier("action_bar_title", "id", "android");

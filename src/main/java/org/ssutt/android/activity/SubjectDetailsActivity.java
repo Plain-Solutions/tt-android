@@ -23,10 +23,17 @@ import static android.os.Build.VERSION_CODES.*;
 public class SubjectDetailsActivity extends ActionBarActivity {
     private static final String SUBJECT_DETAILS = "subject_details";
 
+    public static SubjectDetailsActivity getInstance() {
+        return instance;
+    }
+
+    private static SubjectDetailsActivity instance;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.subject_details_view);
+        instance = this;
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             int actionBarTitleid = Resources.getSystem().getIdentifier("action_bar_title", "id", "android");

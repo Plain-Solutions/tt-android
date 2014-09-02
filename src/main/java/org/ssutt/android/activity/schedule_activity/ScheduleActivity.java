@@ -334,6 +334,11 @@ public class ScheduleActivity extends ActionBarActivity {
     }
 
     private void updateUI(String json) {
+        if(json.equals("abort")) {
+            Toast.makeText(getApplicationContext(), "You internet connection was broken! Please, try later.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(Message.class, new MessageDeserializer());
         JsonElement jsonElement = new JsonParser().parse(json);

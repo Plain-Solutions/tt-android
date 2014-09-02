@@ -24,15 +24,21 @@ public class StaredGroupsActivity extends ActionBarActivity {
     private static final String DEPARTMENT = "department";
     private static final String DEPARTMENT_FULL_NAME = "department_full_name";
     private static final String GROUP = "group";
+    private static StaredGroupsActivity instanece;
 
     private List<String> departmentTags = new ArrayList<String>();
     private List<String> groups = new ArrayList<String>();
     private List<String> departmentFullNames = new ArrayList<String>();
 
+    public static StaredGroupsActivity getInstanece() {
+        return instanece;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.stared_groups_view);
+        instanece = this;
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             int actionBarTitleid = getResources().getIdentifier("action_bar_title", "id", "android");

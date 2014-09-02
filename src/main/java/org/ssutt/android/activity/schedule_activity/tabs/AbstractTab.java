@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -42,6 +43,7 @@ import static org.ssutt.android.activity.schedule_activity.tabs.DayType.DENOMINA
 import static org.ssutt.android.activity.schedule_activity.tabs.DayType.FULL;
 import static org.ssutt.android.activity.schedule_activity.tabs.DayType.NUMERATOR;
 import static org.ssutt.android.adapter.ScheduleListAdapter.TYPE_ITEM;
+import static org.ssutt.android.api.ApiConnector.*;
 import static org.ssutt.android.api.ApiConnector.isInternetAvailable;
 
 public abstract class AbstractTab extends Fragment {
@@ -113,31 +115,45 @@ public abstract class AbstractTab extends Fragment {
         }
 
         String scheduleRequest = ApiRequests.getSchedule(department, group);
+        SharedPreferences sharedPreferences = context.getSharedPreferences(CACHED_SCHEDULE, MODE_PRIVATE);
+        String json = sharedPreferences.getString(scheduleRequest, "isEmpty");
+
+        if (!json.equals("isEmpty")) {
+            System.out.println("CACHED");
+            updateUI(dayType, json);
+        } else {
+            System.out.println("NOT CACHED");
+        }
+
         if (isInternetAvailable(context)) {
+            System.out.println("DOWNLOADING FROM INTERNET");
             ScheduleTask scheduleTask = new ScheduleTask(dayType);
             scheduleTask.execute(scheduleRequest);
         } else {
-            SharedPreferences sharedPreferences = context.getSharedPreferences(CACHED_SCHEDULE, MODE_PRIVATE);
-            String json = sharedPreferences.getString(scheduleRequest, "isEmpty");
-            if (!json.equals("isEmpty")) {
-                updateUI(dayType, json);
-            }
-
+            System.out.println("Internet is not available!");
             swipeLayout.setRefreshing(false);
         }
     }
 
     public void refreshSchedule(Context context, DayType dayType, String department, String group) {
         String scheduleRequest = ApiRequests.getSchedule(department, group);
+        SharedPreferences sharedPreferences = context.getSharedPreferences(CACHED_SCHEDULE, MODE_PRIVATE);
+        String json = sharedPreferences.getString(scheduleRequest, "isEmpty");
+
+        if (!json.equals("isEmpty")) {
+            System.out.println("CACHED");
+            updateUI(dayType, json);
+        } else {
+            System.out.println("NOT CACHED");
+        }
+
         if (isInternetAvailable(context)) {
+            System.out.println("DOWNLOADING FROM INTERNET");
             ScheduleTask scheduleTask = new ScheduleTask(dayType);
             scheduleTask.execute(scheduleRequest);
         } else {
-            SharedPreferences sharedPreferences = context.getSharedPreferences(CACHED_SCHEDULE, MODE_PRIVATE);
-            String json = sharedPreferences.getString(scheduleRequest, "isEmpty");
-            if (!json.equals("isEmpty")) {
-                updateUI(dayType, json);
-            }
+            System.out.println("Internet is not available!");
+            swipeLayout.setRefreshing(false);
         }
     }
 
@@ -224,6 +240,7 @@ public abstract class AbstractTab extends Fragment {
         }
 
         scheduleListView.setAdapter(scheduleListAdapter);
+        swipeLayout.setRefreshing(false);
     }
 
     private class ScheduleTask extends ApiConnector {
@@ -240,13 +257,21 @@ public abstract class AbstractTab extends Fragment {
 
         @Override
         public void onPostExecute(String json) {
+            if(!isValid(json)) {
+                Toast.makeText(context, errorMessages.get(json), Toast.LENGTH_LONG).show();
+                swipeLayout.setRefreshing(false);
+                return;
+            }
+
+            cacheSchedule(json);
+            updateUI(dayType, json);
+        }
+
+        private void cacheSchedule(String json) {
             SharedPreferences sharedPreferences = context.getSharedPreferences(CACHED_SCHEDULE, MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putString(getUrl(), json);
             editor.apply();
-
-            updateUI(dayType, json);
-            swipeLayout.setRefreshing(false);
         }
     }
 }
