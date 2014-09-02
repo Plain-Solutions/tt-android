@@ -101,12 +101,17 @@ public class GroupActivity extends ActionBarActivity {
                 intent.putExtra(DEPARTMENT, department.getTag());
                 intent.putExtra(DEPARTMENT_FULL_NAME, department.getName());
                 intent.putExtra(GROUP, groupNames[position]);
-                startActivity(intent);
 
-                if (firstTime) {
-                    GroupActivity.this.finish();
+
+                if(ScheduleActivity.getInstance() != null) {
+                    ScheduleActivity.getInstance().finish();
+                }
+                if(DepartmentActivity.getInstance() != null) {
                     DepartmentActivity.getInstance().finish();
                 }
+                GroupActivity.this.finish();
+
+                startActivity(intent);
             }
         });
 
@@ -192,6 +197,11 @@ public class GroupActivity extends ActionBarActivity {
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putString(getUrl(), json);
             editor.apply();
+        }
+
+        @Override
+        public Context getContext() {
+            return getApplicationContext();
         }
     }
 }

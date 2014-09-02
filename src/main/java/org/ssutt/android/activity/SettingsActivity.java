@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import org.ssutt.android.R;
 import org.ssutt.android.Typefaces;
+import org.ssutt.android.activity.schedule_activity.ScheduleActivity;
 import org.ssutt.android.adapter.SettingsAdapter;
 
 import java.util.Arrays;
@@ -27,17 +28,10 @@ import static org.ssutt.android.activity.Constants.PREF;
 import static org.ssutt.android.activity.Constants.STAR;
 
 public class SettingsActivity extends ActionBarActivity {
-    private static SettingsActivity instance;
-
-    public static SettingsActivity getInstance() {
-        return instance;
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.settings_view);
-        instance = this;
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             int actionBarTitleid = getResources().getIdentifier("action_bar_title", "id", "android");
@@ -72,6 +66,7 @@ public class SettingsActivity extends ActionBarActivity {
                         editor.apply();
 
                         startActivity(intent);
+                        SettingsActivity.this.finish();
                         break;
                     case 1:
                         Map<String, ?> stringMap = staredPref.getAll();

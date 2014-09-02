@@ -273,5 +273,10 @@ public abstract class AbstractTab extends Fragment {
             editor.putString(getUrl(), json);
             editor.apply();
         }
+
+        @Override
+        public Context getContext() {
+            return getActivity().getApplicationContext();
+        }
     }
 }

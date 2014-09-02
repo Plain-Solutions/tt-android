@@ -5,7 +5,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.http.AndroidHttpClient;
 import android.os.AsyncTask;
-import android.widget.Toast;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -14,6 +13,7 @@ import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
+import org.ssutt.android.R;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -22,38 +22,23 @@ import java.util.HashMap;
 import java.util.Map;
 
 public abstract class ApiConnector extends AsyncTask<String, Integer, String> {
-    private static final String errorMessage = "При загрузке данных произошла ошибка. Проверьте Ваше подключение к сети.";
-    private static final String cacheMessage = "Данные загружены из локального хранилища.";
-    private static final String cacheNoFoundMessage = "Данные в локальном хранилище не найдены.";
     public static final Map<String, String> errorMessages = new HashMap<String, String>();
     private String url;
 
-    static {
-        errorMessages.put("0", "Database error!");
-        errorMessages.put("1", "Production server is down!");
-        errorMessages.put("2", "No such department!");
-        errorMessages.put("3", "No such group!");
-        errorMessages.put("4", "Unsupported encoding!");
-        errorMessages.put("5", "Timeout!");
-        errorMessages.put("6", "Connection refused!");
+    protected ApiConnector() {
+        errorMessages.put("0", getContext().getString(R.string.dbError));
+        errorMessages.put("1", getContext().getString(R.string.productionIsDown));
+        errorMessages.put("2", getContext().getString(R.string.noSuchDepartment));
+        errorMessages.put("3", getContext().getString(R.string.noSuchGroup));
+        errorMessages.put("4", getContext().getString(R.string.unsupportedEncoding));
+        errorMessages.put("5", getContext().getString(R.string.timeout));
+        errorMessages.put("6", getContext().getString(R.string.connectionRefused));
     }
 
     public static boolean isInternetAvailable(Context context) {
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
         return networkInfo != null && networkInfo.isConnectedOrConnecting();
-    }
-
-    public static void errorToast(Context context) {
-        Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show();
-    }
-
-    public static void cacheToast(Context context) {
-        Toast.makeText(context, cacheMessage, Toast.LENGTH_SHORT).show();
-    }
-
-    public static void cacheNoFoundToast(Context context) {
-        Toast.makeText(context, cacheNoFoundMessage, Toast.LENGTH_SHORT).show();
     }
 
     protected boolean isValid(String json) {
@@ -63,6 +48,8 @@ public abstract class ApiConnector extends AsyncTask<String, Integer, String> {
     public String getUrl() {
         return url;
     }
+
+    abstract public Context getContext();
 
     @Override
     protected String doInBackground(String... arg) {

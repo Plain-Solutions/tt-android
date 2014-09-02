@@ -212,5 +212,10 @@ public class DepartmentActivity extends ActionBarActivity {
             editor.putString(getUrl(), json);
             editor.apply();
         }
+
+        @Override
+        public Context getContext() {
+            return getApplicationContext();
+        }
     }
 }

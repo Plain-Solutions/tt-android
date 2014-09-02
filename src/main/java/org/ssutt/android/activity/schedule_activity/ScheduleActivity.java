@@ -12,10 +12,8 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
@@ -69,23 +67,28 @@ import static org.ssutt.android.activity.Constants.STAR;
 import static org.ssutt.android.api.ApiConnector.isInternetAvailable;
 
 public class ScheduleActivity extends ActionBarActivity {
+    private static ScheduleActivity instance;
+
     private String department;
+
     private String departmentFullName;
     private String group;
-
     private PagerAdapter pagerAdapter;
+
     private ViewPager pager;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
 
+    public static ScheduleActivity getInstance() {
+        return instance;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        super.setContentView(R.layout.schedule_view);
-        initialisePaging();
-    }
+        setContentView(R.layout.schedule_view);
+        instance = this;
 
-    private void initialisePaging() {
         final View actionBarLayout = getLayoutInflater().inflate(R.layout.action_bar, null);
         ImageButton btnShowMenu = (ImageButton) actionBarLayout.findViewById(R.id.btnNavigationDrawer);
         final ImageButton btnStar = (ImageButton) actionBarLayout.findViewById(R.id.btnStar);
@@ -204,13 +207,13 @@ public class ScheduleActivity extends ActionBarActivity {
                         SharedPreferences pref = getApplicationContext().getSharedPreferences("pref", MODE_PRIVATE);
                         Bundle extras = getIntent().getExtras();
 
-                        String department = extras.getString(DEPARTMENT);
-                        String group = extras.getString(GROUP);
+                        String department1 = extras.getString(DEPARTMENT);
+                        String group1 = extras.getString(GROUP);
                         String myDepartment = pref.getString(MY_DEPARTMENT, "empty");
                         String myGroup = pref.getString(MY_GROUP, "empty");
                         String myDepartmentFullName = pref.getString(MY_DEPARTMENT_FULL_NAME, "empty");
 
-                        if (department.equals(myDepartment) && group.equals(myGroup)) {
+                        if (department1.equals(myDepartment) && group1.equals(myGroup)) {
                             break;
                         }
 
@@ -219,20 +222,15 @@ public class ScheduleActivity extends ActionBarActivity {
                         intent.putExtra(GROUP, myGroup);
                         intent.putExtra(DEPARTMENT_FULL_NAME, myDepartmentFullName);
                         startActivity(intent);
+                        ScheduleActivity.this.finish();
                         break;
                     case 1:
                         extras = getIntent().getExtras();
                         String departmentTag = extras.getString(DEPARTMENT);
                         String request = ApiRequests.getDepartmentMsg(departmentTag);
 
-                        if (isInternetAvailable(getApplicationContext())) {
-                            DepartmentMessageTask departmentMessageTask = new DepartmentMessageTask();
-                            departmentMessageTask.execute(request);
-                        } else {
-                            SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(CACHED_MSG, MODE_PRIVATE);
-                            String json = sharedPreferences.getString(request, "{\"msg\":\"" + getString(R.string.departmentInfoNotFound) + "\"}");
-                            updateUI(json);
-                        }
+                        DepartmentMessageTask departmentMessageTask = new DepartmentMessageTask();
+                        departmentMessageTask.execute(request);
                         break;
 
                     case 2:
@@ -243,6 +241,7 @@ public class ScheduleActivity extends ActionBarActivity {
                         intent = new Intent(getApplicationContext(), StaredGroupsActivity.class);
                         intent.putExtra(MY_DEPARTMENT, myDepartment);
                         intent.putExtra(MY_GROUP, myGroup);
+
                         startActivity(intent);
                         break;
                     case 3:
@@ -260,7 +259,7 @@ public class ScheduleActivity extends ActionBarActivity {
             }
         });
 
-        mDrawerLayout.setDrawerListener(new ActionBarDrawerToggle(this, mDrawerLayout, R.drawable.ic_launcher, R.string.drawer_open, R.string.drawer_close) {
+        mDrawerLayout.setDrawerListener(new ActionBarDrawerToggle(ScheduleActivity.this, mDrawerLayout, R.drawable.ic_launcher, R.string.drawer_open, R.string.drawer_close) {
             @Override
             public void onDrawerOpened(View drawerView) {
                 daysSpinner.setVisibility(View.GONE);
@@ -333,49 +332,69 @@ public class ScheduleActivity extends ActionBarActivity {
         });
     }
 
-    private void updateUI(String json) {
-        if(json.equals("abort")) {
-            Toast.makeText(getApplicationContext(), "You internet connection was broken! Please, try later.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(Message.class, new MessageDeserializer());
-        JsonElement jsonElement = new JsonParser().parse(json);
-        JsonObject jsonObject = jsonElement.getAsJsonObject();
-
-        Message message = gsonBuilder.create().fromJson(jsonObject, Message.class);
-        if (message.getMessage().equals("")) {
-            message.setMessage(getString(R.string.emptyDepartmentInfo));
-        }
-
-        AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle(getString(R.string.departmentInfoTitle))
-                .setMessage(message.getMessage())
-                .setPositiveButton(getString(R.string.close), null)
-                .show();
-
-        Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/helvetica-light.otf");
-
-        int textViewId = dialog.getContext().getResources().getIdentifier("android:id/alertTitle", null, null);
-        TextView titleTextView = (TextView) dialog.findViewById(textViewId);
-        TextView messageTextView = (TextView) dialog.findViewById(android.R.id.message);
-        Button btnPositive = (Button) dialog.findViewById(android.R.id.button1);
-
-        titleTextView.setTypeface(typeface);
-        messageTextView.setTypeface(typeface);
-        btnPositive.setTypeface(typeface);
-    }
 
     class DepartmentMessageTask extends ApiConnector {
+        AlertDialog dialog;
+
+        @Override
+        protected void onPreExecute() {
+            dialog = new AlertDialog.Builder(ScheduleActivity.this)
+                    .setTitle(getString(R.string.departmentInfoTitle))
+                    .setMessage(getString(R.string.loadingMessage))
+                    .setPositiveButton(getString(R.string.close), null)
+                    .show();
+
+            Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/helvetica-light.otf");
+
+            int textViewId = dialog.getContext().getResources().getIdentifier("android:id/alertTitle", null, null);
+            TextView titleTextView = (TextView) dialog.findViewById(textViewId);
+            TextView messageTextView = (TextView) dialog.findViewById(android.R.id.message);
+            Button btnPositive = (Button) dialog.findViewById(android.R.id.button1);
+
+            titleTextView.setTypeface(typeface);
+            messageTextView.setTypeface(typeface);
+            btnPositive.setTypeface(typeface);
+        }
+
         @Override
         protected void onPostExecute(String json) {
+            System.out.println("ON POST: " + json);
+            if (!isValid(json)) {
+                SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(CACHED_MSG, MODE_PRIVATE);
+                String cachedJson = sharedPreferences.getString(getUrl(), "{\"msg\":\"" + getString(R.string.departmentInfoNotFound) + "\"}");
+                System.out.println("CACHED JSON: " + cachedJson);
+                updateUI(cachedJson);
+                return;
+            }
+
+            cacheMessage(json);
+            updateUI(json);
+        }
+
+        private void updateUI(String json) {
+            GsonBuilder gsonBuilder = new GsonBuilder();
+            gsonBuilder.registerTypeAdapter(Message.class, new MessageDeserializer());
+            JsonElement jsonElement = new JsonParser().parse(json);
+            JsonObject jsonObject = jsonElement.getAsJsonObject();
+
+            Message message = gsonBuilder.create().fromJson(jsonObject, Message.class);
+            if (message.getMessage().equals("")) {
+                message.setMessage(getString(R.string.emptyDepartmentInfo));
+            }
+
+            dialog.setMessage(message.getMessage());
+        }
+
+        private void cacheMessage(String json) {
             SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(CACHED_MSG, MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putString(getUrl(), json);
             editor.apply();
+        }
 
-            updateUI(json);
+        @Override
+        public Context getContext() {
+            return getApplicationContext();
         }
     }
 

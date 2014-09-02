@@ -66,6 +66,11 @@ public class StaredGroupsActivity extends ActionBarActivity {
                 intent.putExtra(DEPARTMENT, departmentTags.get(position));
                 intent.putExtra(GROUP, groups.get(position));
                 intent.putExtra(DEPARTMENT_FULL_NAME, departmentFullNames.get(position));
+
+                if(ScheduleActivity.getInstance() != null) {
+                    ScheduleActivity.getInstance().finish();
+                }
+                StaredGroupsActivity.this.finish();
                 startActivity(intent);
             }
         });

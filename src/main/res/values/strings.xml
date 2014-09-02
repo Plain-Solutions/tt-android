@@ -37,6 +37,15 @@
     <string name="changeMyGroup">Сменить мою группу</string>
     <string name="cleanStaredGroups">Очистить сохраненные группы</string>
 
+    <string name="dbError">Ошибка базы данных! Сообщите, пожалуйста, разработчику!</string>
+    <string name="productionIsDown">Сервер упал! Сообщите как можно скорее разработчику!</string>
+    <string name="noSuchDepartment">Такого факультета не существует!</string>
+    <string name="noSuchGroup">Такой группы не существует!</string>
+    <string name="unsupportedEncoding">Неподдерживаемая кодировка! Сообщите, пожалуйста, разработчику!</string>
+    <string name="timeout">Таймаут! Повторите действие еще раз!</string>
+    <string name="connectionRefused">Соединение разорвано!</string>
+    <string name="loadingMessage">Загрузка...</string>
+
     <color name="red">#ff5e3a</color>
     <color name="green">#4cd964</color>
     <color name="blue">#66cdfc</color>
