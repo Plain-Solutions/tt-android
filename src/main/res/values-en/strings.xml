@@ -44,6 +44,7 @@
     <string name="unsupportedEncoding">Unsupported encoding! Please, contact with us!</string>
     <string name="timeout">Timeout!</string>
     <string name="connectionRefused">Connection refused!</string>
+    <string name="loadingMessage">Loading…</string>
 
     <color name="red">#ff5e3a</color>
     <color name="green">#4cd964</color>
